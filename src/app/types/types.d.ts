@@ -46,7 +46,7 @@ export interface Manager {
   managedDepartments: DepartmentManager[];
   emailVerificationToken?: EmailVerificationToken;
   assignedTasks: Task[];
-}
+};
 
 export interface EmailVerificationToken {
   emailVerificationTokenId: string;
