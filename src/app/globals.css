@@ -32,16 +32,6 @@
     }
 }
 
-.container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Full screen height */
-    background-color: black; /* Optional for better visibility */
-    overflow: hidden;
-}
-
 .blur1 {
     position: absolute;
     height: 800px;

@@ -70,21 +70,23 @@ const InputField: React.FC<InputFieldProps> = ({
       </motion.span>
 
       <motion.input
-        type={type}
-        {...(rest as any)}
-        onChange={handleChange}
-        onFocus={(e) => {
-          setIsFocused(true);
-          if (rest.onFocus) rest.onFocus(e);
-        }}
-        onBlur={(e) => {
-          setIsFocused(false);
-          if (rest.onBlur) rest.onBlur(e);
-        }}
-        animate={{ paddingLeft: isFocused ? "0px" : "32px" }}
-        transition={{ duration: 0.2 }}
-        className="w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md"
-      />
+  type={type}
+  name={rest.name}
+  value={rest.value}
+  onChange={handleChange}
+  onFocus={(e) => {
+    setIsFocused(true);
+    if (rest.onFocus) rest.onFocus(e);
+  }}
+  onBlur={(e) => {
+    setIsFocused(false);
+    if (rest.onBlur) rest.onBlur(e);
+  }}
+  animate={{ paddingLeft: isFocused ? "0px" : "32px" }}
+  transition={{ duration: 0.2 }}
+  className="w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md"
+/>
+
 
       {error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
     </div>
@@ -96,7 +98,7 @@ const InputField: React.FC<InputFieldProps> = ({
 // -------------------------
 const Signup = () => {
   const [step, setStep] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Form data state (ensure these keys match what your API expects)
@@ -214,7 +216,7 @@ const Signup = () => {
         }
   
         console.log("Data submitted successfully:", data);
-        setSubmitted(true);
+      
       } catch (error) {
         console.error("Error submitting data:", error);
         setErrors((prev) => ({

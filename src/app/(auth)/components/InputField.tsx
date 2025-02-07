@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IconType } from "react-icons";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   placeholder: string;
@@ -13,6 +13,7 @@ const InputField: React.FC<InputFieldProps> = ({
   placeholder,
   Icon,
   error,
+  onChange,
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -22,8 +23,8 @@ const InputField: React.FC<InputFieldProps> = ({
   // Intercept onChange to update local state and call any passed handler.
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasContent(e.target.value !== "");
-    if (rest.onChange) {
-      rest.onChange(e);
+    if (onChange) {
+      onChange(e); // Pass to the parent component's onChange handler
     }
   };
 
@@ -59,16 +60,15 @@ const InputField: React.FC<InputFieldProps> = ({
 
       <motion.input
         type={type}
-        // Cast the spread props as "any" to avoid type conflicts with Framer Motion.
-        {...(rest as any)}
-        onChange={handleChange}
+        {...(rest as HTMLMotionProps<"input">)} // Cast rest to proper motion.input props
+        onChange={handleChange} // Updated to use the custom handleChange
         onFocus={(e) => {
           setIsFocused(true);
-          if (rest.onFocus) rest.onFocus(e);
+          if (rest.onFocus) rest.onFocus(e); // Call parent's onFocus if exists
         }}
         onBlur={(e) => {
           setIsFocused(false);
-          if (rest.onBlur) rest.onBlur(e);
+          if (rest.onBlur) rest.onBlur(e); // Call parent's onBlur if exists
         }}
         animate={{ paddingLeft: isFocused ? "0px" : "32px" }}
         transition={{ duration: 0.2 }}

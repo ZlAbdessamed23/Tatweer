@@ -14,8 +14,8 @@ const Hero = () => {
 
   return (
     <>
-        <Image src={"/light.png"} height={10000} width={10000} alt={'light'} className='absolute top-[-300px] opacity-5' />
-      <div className='max-w-[1400px] gap-2 text-white flex flex-col h-auto mx-auto'>
+        <Image src={"/light.png"} height={10000} width={10000} alt={'light'} className='absolute overflow-hidden top-[-300px] opacity-5' />
+      <div className='max-w-[1400px] gap-2 text-white flex flex-col overflow-hidden h-auto mx-auto'>
   
         <h1 className='text-[30px] md:text-[32px] lg:text-[58px]  flex justify-center items-center flex-col text-center font-bold'>
         Think smarter. Adapt faster. Optimize your logistics for

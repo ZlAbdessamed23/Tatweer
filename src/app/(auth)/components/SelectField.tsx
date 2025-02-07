@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
 import { IconType } from 'react-icons';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UseFormSetValue } from 'react-hook-form';
 
 interface SelectFieldProps {
     placeholder?: string;
     Icon: IconType;
-    name: string;
-    setValue: UseFormSetValue<any>; // Use setValue prop
+
+    value: string; // Add this
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; // Add this
     options: { value: string; label: string; }[];
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({
     placeholder = '',
     Icon,
-    name,
-    setValue,
+    value,
+    onChange,
     options
 }) => {
     const [isFocused, setIsFocused] = useState(false);
-    const [hasContent, setHasContent] = useState(false);
+    const [hasContent, setHasContent] = useState(value !== '');
 
     return (
         <div className="relative w-full mt-4">
@@ -51,9 +51,10 @@ const SelectField: React.FC<SelectFieldProps> = ({
             </AnimatePresence>
 
             <motion.select
+                value={value}
                 onChange={(e) => {
                     setHasContent(e.target.value !== '');
-                    setValue(name, e.target.value);
+                    onChange(e); // Call the passed onChange handler
                 }}
                 onFocus={() => setIsFocused(true)}
                 onBlur={(e) => {

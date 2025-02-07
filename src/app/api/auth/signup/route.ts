@@ -25,7 +25,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
    
-    const { admin} = await createAdmin(data);
+     await createAdmin(data);
 
    
 

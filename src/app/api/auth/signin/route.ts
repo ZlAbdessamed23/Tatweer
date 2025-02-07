@@ -16,7 +16,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     
         if (missingFields.length > 0) {
           
-    
+          console.log(missingFields)
           return NextResponse.json(
             { message: `${missingFields.join(", ")}: sont requis` },
             { status: 400 }

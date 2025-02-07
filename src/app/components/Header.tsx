@@ -1,18 +1,25 @@
 
 import Link from "next/link";
-
+import { cookies } from 'next/headers'
 
 import Image from "next/image";
 import DropdownImageMenu from "./Hamb"
 
 
-const Header = () => {
+const Header = async () => {
+
+  const cookieStore = await cookies()
+  const token = cookieStore.get('token')
+
+
+
+
   const links = ["Home", "What is name", "Our services", "Third party", "Contact us" , "Pricing" ,"FAQ", "signup", "login"]; // Menu links
   const imageSrc = "/svg/hamp.svg"; // Path to your menu image
   const altText = "Menu Icon";
 
   return (
-    <div className="h-[88px] fixed z-20  py-8 px-[7%] flex justify-center items-center w-full ">
+    <div className="h-[88px] fixed z-20   py-8 px-[7%] flex justify-center items-center w-full ">
     
         {/* Logo - Preloaded image for faster load */}
         <div   className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold"> 
@@ -44,18 +51,34 @@ const Header = () => {
 
 
         {/* Desktop Buttons */}
-        <div className="hidden flex-row gap-6 lg:flex lg:items-center">
-        <Link href="/signup">
-            <button className="relative h-12 w-40 overflow-hidden border border-[#A77DFF] text-[#A77DFF] shadow-2xl transition-all   rounded-[10px] duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-[#A77DFF] before:duration-300 before:ease-out hover:text-[#110A2E] hover:shadow-[0_4px_20px_#A77DFF] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
-              <span className="relative z-1">Sign Up</span>
-            </button>
-          </Link>
-          <Link href="/login">
-            <button className="relative h-12 w-40 overflow-hidden border border-[#A77DFF] text-white hover:text-[#A77DFF] rounded-[10px]  shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm bg-[#A77DFF]  before:bg-[#110A2E]  before:duration-300 before:ease-out  hover:shadow-[0_4px_20px_#A77DFF] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
-              <span className="relative z-1">Log In</span>
-            </button>
-          </Link>
-</div>
+        {
+          token ? 
+          <>
+          
+          <Link href="/dashboard">
+              <button className="relative h-12 w-40 overflow-hidden border border-[#A77DFF] text-white hover:text-[#A77DFF] rounded-[10px]  shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm bg-[#A77DFF]  before:bg-[#110A2E]  before:duration-300 before:ease-out  hover:shadow-[0_4px_20px_#A77DFF] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
+                <span className="relative z-1">dashboard</span>
+              </button>
+            </Link>
+        </>
+
+          :
+          <>
+          <div className="hidden flex-row gap-6 lg:flex lg:items-center">
+      <Link href="/signup">
+          <button className="relative h-12 w-40 overflow-hidden border border-[#A77DFF] text-[#A77DFF] shadow-2xl transition-all   rounded-[10px] duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-[#A77DFF] before:duration-300 before:ease-out hover:text-[#110A2E] hover:shadow-[0_4px_20px_#A77DFF] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
+            <span className="relative z-1">Sign Up</span>
+          </button>
+        </Link>
+        <Link href="/login">
+          <button className="relative h-12 w-40 overflow-hidden border border-[#A77DFF] text-white hover:text-[#A77DFF] rounded-[10px]  shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm bg-[#A77DFF]  before:bg-[#110A2E]  before:duration-300 before:ease-out  hover:shadow-[0_4px_20px_#A77DFF] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
+            <span className="relative z-1">Log In</span>
+          </button>
+                  </Link>
+        </div>
+      </>
+        }
+     
 
           
 
