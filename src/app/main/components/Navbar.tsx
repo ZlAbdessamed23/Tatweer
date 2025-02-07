@@ -4,7 +4,7 @@ import { IoIosNotificationsOutline } from "react-icons/io";
 
 export default function Navbar() {
     return (
-        <div className="flex h-20 flex-row justify-between items-center p-4 bg-white">
+        <div className="flex h-20 flex-row justify-between  items-center p-4 bg-white">
             <div>
                 <h1 className='text-center text-2xl font-medium mt-4 mb-6 text-main-blue '>Orca Bitches</h1>
             </div>
