@@ -26,11 +26,28 @@ export async function verifyEmailToken(
       user = await prisma.admin.update({
         where: { adminId: verificationToken.emailVerificationTokenAdminId as string },
         data: { adminIsActivated: true },
+        select:{
+          adminId: true,
+          adminEmail: true,
+          adminFirstName: true,
+          adminLastName: true,
+          
+          adminIsActivated: true,
+        }
+        
       });
     } else {
       user = await prisma.manager.update({
         where: { managerId: verificationToken.emailVerificationTokenManagerId as string },
         data: { managerIsActivated: true },
+        select:{
+          managerId: true,
+          managerEmail: true,
+          managerFirstName: true,
+          managerLastName: true,
+          
+          managerIsActivated: true,
+        }
       });
     }
 

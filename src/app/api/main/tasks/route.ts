@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addDepartment, getAllDepartments } from "@/app/api/main/departments/controller";
-import { AddDepartmentData, requiredDepartmentFields } from "@/app/api/main/departments/types";
+import {
+  addTask,
+  getAllTasks,
+  
+} from "@/app/api/main/tasks/controller";
+import { AddTaskData, requiredTaskFields } from "@/app/api/main/tasks/types";
 import { handleError } from "@/lib/error-handler/handleError";
 import { getUser } from "@/lib/token/getUserFromToken";
 
@@ -12,9 +16,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorise" }, { status: 401 });
     }
     
-
-    const data: AddDepartmentData = await request.json();
-    const missingFields = requiredDepartmentFields.filter(
+ 
+    const data: AddTaskData = await request.json();
+    const missingFields = requiredTaskFields.filter(
           (field) => !data[field]
         );
     
@@ -26,14 +30,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             { status: 400 }
           );
         }
-     await addDepartment(
-      data,
-      user.companyId,
-      
-    );
+
+    await addTask(data,  user.id);
 
     return NextResponse.json(
-      { message: "department created successfully" },
+      {
+        message: "task has been created successfully",
+      },
       { status: 201 }
     );
   } catch (error) {
@@ -49,8 +52,8 @@ export async function GET(request: NextRequest) {
     }
     
 
-    const Departments = await getAllDepartments(user.companyId);
-    return NextResponse.json(Departments, { status: 200 });
+    const tasks = await getAllTasks(user.id);
+    return NextResponse.json(tasks, { status: 200 });
   } catch (error) {
     return handleError(error);
   }
