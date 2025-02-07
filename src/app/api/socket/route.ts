@@ -1,7 +1,7 @@
 // app/api/sales/route.ts
-import type { NextRequest } from 'next/server';
 
-export async function GET(req: NextRequest) {
+
+export async function GET() {
   const encoder = new TextEncoder();
   let intervalId: NodeJS.Timeout;
 
