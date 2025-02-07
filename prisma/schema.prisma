@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,8 +6,204 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+
+enum DepartementType {
+  sales
+  marketing
+  finance
+  humanResources
+  operations
+  engineering
+  product
+  design
+  customerSupport
+  dataScience
+  logistics
+  legal
+  it
+  other
+   
+}
+enum ColumnType {
+  email
+  phoneNumber 
+  string 
+  number 
+  url
+  date
+  time
+   
+}
+model Admin {
+  adminId                      String                    @id @default(cuid())
+  adminFirstName              String
+  adminLastName               String
+  adminEmail                  String                    @unique
+  adminPassword               String
+  adminIsActivated           Boolean                   @default(false)
+  
+  managedCompany              Company?                  @relation("AdminToCompany")
+  emailVerificationToken      EmailVerificationToken?   @relation("AdminVerification")
+  assignedTasks               Task[]                    @relation("AdminTasks")
+}
+
+model Company {
+  companyId              String         @id @default(cuid())
+  companyName            String
+  companyEmployeeNumber  Int
+  companyLocation        String
+  companyPhoneNumber     String
+  companyEmail           String
+  
+  administrator          Admin          @relation("AdminToCompany", fields: [adminCompanyId], references: [adminId])
+  adminCompanyId         String         @unique
+  companyManagers        Manager[]      @relation("CompanyToManager")
+  companyDepartments     Department[]   @relation("CompanyToDepartment")
+  companySubscription    Subscription?  @relation("CompanyToSubscription")
+}
+
+model Manager {
+  managerId                   String                    @id @default(cuid())
+  managerFirstName           String
+  managerLastName            String
+  managerEmail               String                    @unique
+  managerPassword            String
+  managerIsActivated        Boolean                   @default(false)
+  managerCompanyId          String
+  
+  employingCompany           Company                   @relation("CompanyToManager", fields: [managerCompanyId], references: [companyId])
+  managedDepartments         DepartmentManager[]       @relation("ManagerToDepartments")
+  emailVerificationToken     EmailVerificationToken?   @relation("ManagerVerification")
+  assignedTasks              Task[]                    @relation("ManagerTasks")
+}
+
+model EmailVerificationToken {
+  emailVerificationTokenId        String    @id @default(cuid())
+  emailVerificationTokenToken     String    @unique
+  emailVerificationTokenAdminId   String?   @unique
+  emailVerificationTokenManagerId String?   @unique
+  emailVerificationTokenCreatedAt DateTime  @default(now())
+  emailVerificationTokenExpiresAt DateTime
+  
+  adminVerification              Admin?    @relation("AdminVerification", fields: [emailVerificationTokenAdminId], references: [adminId])
+  managerVerification            Manager?  @relation("ManagerVerification", fields: [emailVerificationTokenManagerId], references: [managerId])
+}
+
+model Plan {
+  planId              String         @id @default(cuid())
+  planName            String
+  planMaxAPICalls     Int
+  planMaxManagers     Int
+  planMaxDepartments  Int
+  planAllowedAITypes  String
+  
+  planSubscriptions   Subscription[] @relation("PlanToSubscription")
+}
+
+model Subscription {
+  subscriptionId          String   @id @default(cuid())
+  subscriptionStartDate   DateTime @default(now())
+  subscriptionEndDate     DateTime
+  subscriptionCompanyId   String   @unique
+  subscriptionPlanId      String
+  
+  subscribedCompany       Company  @relation("CompanyToSubscription", fields: [subscriptionCompanyId], references: [companyId])
+  subscriptionPlan        Plan     @relation("PlanToSubscription", fields: [subscriptionPlanId], references: [planId])
+}
+
+model Department {
+  departmentId             String                  @id @default(cuid())
+  departmentName           String
+  departmentType           DepartementType
+  departmentCompanyId      String
+  
+  parentCompany            Company                 @relation("CompanyToDepartment", fields: [departmentCompanyId], references: [companyId])
+  departmentManagers       DepartmentManager[]     @relation("DepartmentToManagers")
+  departmentTables         Table[]                 @relation("DepartmentToTables")
+  departmentIntegrations   ThirdPartyIntegration[] @relation("DepartmentToIntegrations")
+  departmentConnections    DatabaseConnection[]    @relation("DepartmentToConnections")
+}
+
+model DepartmentManager {
+  departmentId   String
+  managerId      String
+  
+  managedDepartment Department @relation("DepartmentToManagers", fields: [departmentId], references: [departmentId])
+  departmentManager Manager    @relation("ManagerToDepartments", fields: [managerId], references: [managerId])
+
+  @@id([departmentId, managerId])
+}
+
+model Table {
+  tableId           String    @id @default(cuid())
+  tableName         String
+  tableDepartmentId String
+  tableCreatedAt    DateTime  @default(now())
+  tableUpdatedAt    DateTime  @updatedAt
+  
+  tableDepartment   Department @relation("DepartmentToTables", fields: [tableDepartmentId], references: [departmentId])
+  tableColumns      Column[]   @relation("TableToColumns")
+  tableRows         Row[]      @relation("TableToRows")
+}
+
+model Column {
+  columnId        String  @id @default(cuid())
+  columnName      String
+  columnType      ColumnType
+  columnTableId   String
+  
+  columnTable     Table   @relation("TableToColumns", fields: [columnTableId], references: [tableId])
+  columnCells     Cell[]  @relation("ColumnToCells")
+}
+
+model Row {
+  rowId          String   @id @default(cuid())
+  rowTableId     String
+  rowCreatedAt   DateTime @default(now())
+  
+  rowTable       Table    @relation("TableToRows", fields: [rowTableId], references: [tableId])
+  rowCells       Cell[]   @relation("RowToCells")
+}
+
+model Cell {
+  cellId          String  @id @default(cuid())
+  cellRowId       String
+  cellColumnId    String
+  cellValue       String
+  
+  cellRow         Row     @relation("RowToCells", fields: [cellRowId], references: [rowId])
+  cellColumn      Column  @relation("ColumnToCells", fields: [cellColumnId], references: [columnId])
+}
+
+model Task {
+  taskId           String   @id @default(cuid())
+  taskTitle        String
+  taskDescription  String
+  taskAdminId      String
+  taskManagerId    String
+  taskCreatedAt    DateTime @default(now())
+  taskDueDate      DateTime
+  taskStatus       String
+  
+  taskAdmin        Admin    @relation("AdminTasks", fields: [taskAdminId], references: [adminId])
+  taskManager      Manager  @relation("ManagerTasks", fields: [taskManagerId], references: [managerId])
+}
+
+model ThirdPartyIntegration {
+  thirdPartyIntegrationId              String     @id @default(cuid())
+  thirdPartyIntegrationType            String
+  thirdPartyIntegrationDepartmentId    String
+  thirdPartyIntegrationConnectionDetails String
+  
+  integrationDepartment               Department @relation("DepartmentToIntegrations", fields: [thirdPartyIntegrationDepartmentId], references: [departmentId])
+}
+
+model DatabaseConnection {
+  databaseConnectionId              String     @id @default(cuid())
+  databaseConnectionType            String
+  databaseConnectionDepartmentId    String
+  databaseConnectionConnectionString String
+  databaseConnectionCredentials     String
+  
+  connectionDepartment             Department @relation("DepartmentToConnections", fields: [databaseConnectionDepartmentId], references: [departmentId])
 }
