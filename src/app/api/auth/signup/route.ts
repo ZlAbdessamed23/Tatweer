@@ -3,7 +3,7 @@ import { AdminSignupData, requiredFields } from "./types";
 import { handleError } from "@/lib/error-handler/handleError";
 import {
   createAdmin,
-  sendVerificationEmail,
+  
 } from "@/app/api/auth/signup/controller";
 
 
@@ -25,9 +25,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
    
-    const { admin, token} = await createAdmin(data);
+    const { admin} = await createAdmin(data);
 
-    await sendVerificationEmail(admin.adminEmail,token,admin.adminFirstName);
+   
 
     return NextResponse.json(
       {
