@@ -59,7 +59,7 @@ const InputField: React.FC<InputFieldProps> = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         animate={{
-          paddingLeft: isFocused ? "0px" : "32px",
+          paddingLeft: isFocused ? "16px" : "32px",
         }}
         transition={{ duration: 0.2 }}
         className={`w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md`}
