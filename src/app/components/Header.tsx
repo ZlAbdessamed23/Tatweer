@@ -14,12 +14,10 @@ const Header = async () => {
 
 
 
-  const links = ["Home", "What is name", "Our services", "Third party", "Contact us" , "Pricing" ,"FAQ", "signup", "login"]; // Menu links
-  const imageSrc = "/svg/hamp.svg"; // Path to your menu image
-  const altText = "Menu Icon";
+  const links = [  "Our services", "Third party" , "Pricing" , "signup", "login"]; // Menu links
 
   return (
-    <div className="h-[88px] fixed z-20   py-8 px-[7%] flex justify-center items-center w-full ">
+    <div className="h-[88px] absolute z-20   py-8 px-[7%] flex justify-center items-center w-full ">
     
         {/* Logo - Preloaded image for faster load */}
         <div   className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold"> 
@@ -31,7 +29,7 @@ const Header = async () => {
         {/* Desktop Navigation */}
         <div className="hidden mr-auto lg:block">
         <ul className="menu-list  ">
-          { ["Home", "What is name", "Our services", "Third party", "Contact us" , "Pricing" ,"FAQ"].map((menuItem, index) => (
+          { ["Our services", "Third party" , "Pricing" ].map((menuItem, index) => (
             <li key={index} className="menu-item">
               <Link href={`pages/${menuItem}`} className="menu-link">
                 {menuItem}
@@ -42,7 +40,7 @@ const Header = async () => {
         </div>
 
         <div className="lg:hidden flex ml-auto">  
-        <DropdownImageMenu links={links} imageSrc={imageSrc} altText={altText} />
+        <DropdownImageMenu links={links}  />
         </div>
        
 
@@ -70,9 +68,9 @@ const Header = async () => {
             <span className="relative z-1">Sign Up</span>
           </button>
         </Link>
-        <Link href="/login">
+        <Link href="/signin">
           <button className="relative h-12 w-40 overflow-hidden border border-[#A77DFF] text-white hover:text-[#A77DFF] rounded-[10px]  shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm bg-[#A77DFF]  before:bg-[#110A2E]  before:duration-300 before:ease-out  hover:shadow-[0_4px_20px_#A77DFF] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
-            <span className="relative z-1">Log In</span>
+            <span className="relative z-1">Sign In</span>
           </button>
                   </Link>
         </div>
