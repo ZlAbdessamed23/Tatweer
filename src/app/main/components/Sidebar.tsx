@@ -11,7 +11,8 @@ import {
     FaCreditCard,
     FaHandHoldingUsd,
     FaRegWindowRestore,
-    FaCog
+    FaCog,
+    FaTasks
 } from "react-icons/fa"
 import { BsTools } from "react-icons/bs";
 import { usePathname } from 'next/navigation'
@@ -20,7 +21,7 @@ interface SidebarItemType {
     icon: React.ComponentType<{ className?: string }>;
     title: string;
     url: string;
-}
+};
 
 function SidebarItem({ itemInfos, path }: { itemInfos: SidebarItemType, path: string }): React.ReactElement {
     const isSelected = path === itemInfos.url
@@ -58,6 +59,11 @@ export default function Sidebar() {
             icon: BsTools,
             title: "Departement",
             url: "/main/departements",
+        },
+        {
+            icon: FaTasks,
+            title: "Tasks",
+            url: "/main/tasks",
         },
         {
             icon: FaChartLine,
