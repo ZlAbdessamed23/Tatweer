@@ -106,9 +106,13 @@ export class CustomError extends Error {
     }
   }
   
-  export class SubscriptionError extends CustomError {
-    constructor(message: string, details?: string) {
-      super(message, 402, "SUBSCRIPTION_ERROR", details);
+  export class SubscriptionError extends Error {
+    public redirectUrl?: string;
+  
+    constructor(message: string, options?: { redirectUrl: string }) {
+      super(message);
+      this.name = "SubscriptionError";
+      this.redirectUrl = options?.redirectUrl;
     }
   }
   

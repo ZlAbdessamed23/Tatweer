@@ -1,31 +1,36 @@
-import React, { useState } from 'react';
-import { IconType } from 'react-icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { UseFormRegister } from 'react-hook-form';
+import React, { useState } from "react";
+import { IconType } from "react-icons";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface InputFieldProps {
-  type?: string;
-  placeholder?: string;
-  Icon: IconType;
-  name: string;
-  register: UseFormRegister<any>;
+interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  placeholder: string;
+  Icon?: IconType;
+  error?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
-  type = 'text',
-  placeholder = '',
+  type = "text",
+  placeholder,
   Icon,
-  name,
-  register
+  error,
+  ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasContent, setHasContent] = useState(false);
   const showLabel = isFocused || hasContent;
 
+  // Intercept onChange to update local state and call any passed handler.
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHasContent(e.target.value !== "");
+    if (rest.onChange) {
+      rest.onChange(e);
+    }
+  };
+
   return (
     <div className="relative w-full mt-4">
       <AnimatePresence>
-        {!isFocused && (
+        {!isFocused && Icon && (
           <motion.div
             initial={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
@@ -45,25 +50,32 @@ const InputField: React.FC<InputFieldProps> = ({
           scale: showLabel ? 0.8 : 1,
         }}
         transition={{ duration: 0.2 }}
-        className={`absolute left-0 px-1 bg-white pointer-events-none
-          ${showLabel ? 'text-purple-600' : 'text-gray-500'}`}
+        className={`absolute left-0 px-1 bg-white pointer-events-none ${
+          showLabel ? "text-purple-600" : "text-gray-500"
+        }`}
       >
         {placeholder}
       </motion.span>
 
       <motion.input
         type={type}
-        {...register(name, {
-          onChange: (e) => setHasContent(e.target.value !== '')
-        })}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        animate={{
-          paddingLeft: isFocused ? "0px" : "32px",
+        // Cast the spread props as "any" to avoid type conflicts with Framer Motion.
+        {...(rest as any)}
+        onChange={handleChange}
+        onFocus={(e) => {
+          setIsFocused(true);
+          if (rest.onFocus) rest.onFocus(e);
         }}
+        onBlur={(e) => {
+          setIsFocused(false);
+          if (rest.onBlur) rest.onBlur(e);
+        }}
+        animate={{ paddingLeft: isFocused ? "0px" : "32px" }}
         transition={{ duration: 0.2 }}
-        className={`w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md`}
+        className="w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md"
       />
+
+      {error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
     </div>
   );
 };
