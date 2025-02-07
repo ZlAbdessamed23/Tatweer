@@ -5,6 +5,12 @@ import { BiTargetLock } from "react-icons/bi"
 import { HiOutlineCurrencyDollar } from "react-icons/hi"
 import StrategyCard from './componenets/strategy-card'
 
+
+
+
+
+
+
 const strategies = [
   {
     title: "Operation Strategie",
@@ -62,6 +68,10 @@ const strategies = [
     backgroundColor: "#F0FAFF",
   },
 ]
+
+
+
+
 
 export default function StrategiesPage() {
   return (

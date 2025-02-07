@@ -69,31 +69,37 @@ export default function SalesDashboard() {
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/light-v11",
+      style: "mapbox://styles/mapbox/navigation-day-v1",
       center: [-6.5, 33.5],
       zoom: 5.5,
     })
-
     map.on("load", () => {
-      locationMarkers.forEach((marker) => {
-        const el = document.createElement("div")
-        el.className = "marker"
-        el.style.width = "24px"
-        el.style.height = "24px"
-        el.style.backgroundImage =
-          "url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMEMxOC42MjcgMCAyNCA1LjM3MyAyNCAxMkMyNCAxOC42MjcgMTguNjI3IDI0IDEyIDI0QzUuMzczIDI0IDAgMTguNjI3IDAgMTJDMCA1LjM3MyA1LjM3MyAwIDEyIDBaTTEyIDJDNi40NzcgMiAyIDYuNDc3IDIgMTJDMiAxNy41MjMgNi40NzcgMjIgMTIgMjJDMTcuNTIzIDIyIDIyIDE3LjUyMyAyMiAxMkMyMiA2LjQ3NyAxNy41MjMgMiAxMiAyWiIgZmlsbD0iIzAwNzFmZiIvPjwvc3ZnPg==)"
-        el.style.backgroundSize = "100%"
+        // Set initial far zoom level
+        map.setZoom(1);
+      
+        // Animate zoom to Algeria
+        setTimeout(() => {
+          map.flyTo({
+            center: [4.16,34.75], // Algeria's coordinates (longitude, latitude)
+            zoom: 5.5, // Adjust the zoom level as needed
+            speed: 1.5, // Adjust speed of the animation
+            curve: 1.5, // Adjust the easing of the animation
+          });
+        }, 1000); // Delay to ensure animation starts after map loads
+      
+        locationMarkers.forEach((marker) => {
+          const el = document.createElement("div");
+          
+            el.style.backgroundSize = "100%";
+          el.style.background = "linear-gradient(135deg, #ff7e5f, #feb47b)";
 
-        new mapboxgl.Marker(el)
-          .setLngLat([marker.lng, marker.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h3 class="font-medium">${marker.name}</h3>`))
-          .addTo(map)
-      })
-
-      setIsLoading(false)
-    })
-
-    return () => map.remove()
+        });
+      
+        setIsLoading(false);
+      });
+      
+      return () => map.remove();
+      
   }, [])
 
   return (
@@ -139,7 +145,7 @@ export default function SalesDashboard() {
           className="bg-white p-6 rounded-lg shadow-sm"
         >
           <h2 className="text-lg font-semibold mb-4">Products Sales</h2>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-scroll">
             {productsData.map((product, index) => (
               <motion.div
                 key={product.name}
