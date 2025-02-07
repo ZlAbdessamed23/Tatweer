@@ -5,6 +5,7 @@ import Focal from './components/Focal'
 import Band from './components/Band'
 import Focal1 from './components/Focal1';
 import PricingCard from './components/Pricing-card'
+import Footer from './components/Footer'
 export default async function Home() {
 
   const pricingData = [
@@ -99,7 +100,7 @@ export default async function Home() {
 
     </div>
     
-    <div className="grid   grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-36 m-32">
+    <div className="grid   grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-36 mx-12 m-4 md:m-32">
           {pricingData.map((plan, index) => (
             <PricingCard
               key={index}
@@ -113,7 +114,7 @@ export default async function Home() {
         </div>
 
 
-
+          <Footer></Footer>
 
     </div>
 
