@@ -44,6 +44,6 @@ export type AdminSignupResult = {
         emailVerificationToken: true;
       };
     }>;
-    token: string; // Added the missing token property
+    
   };
   

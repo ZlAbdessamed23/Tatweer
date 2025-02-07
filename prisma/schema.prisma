@@ -40,7 +40,7 @@ model Admin {
   adminLastName               String
   adminEmail                  String                    @unique
   adminPassword               String
-  adminIsActivated           Boolean                   @default(false)
+  adminIsActivated           Boolean                   @default(true)
   
   managedCompany              Company?                  @relation("AdminToCompany")
   emailVerificationToken      EmailVerificationToken?   @relation("AdminVerification")
@@ -68,7 +68,7 @@ model Manager {
   managerLastName            String
   managerEmail               String                    @unique
   managerPassword            String
-  managerIsActivated        Boolean                   @default(false)
+  managerIsActivated        Boolean                   @default(true)
   managerCompanyId          String
   
   employingCompany           Company                   @relation("CompanyToManager", fields: [managerCompanyId], references: [companyId])
