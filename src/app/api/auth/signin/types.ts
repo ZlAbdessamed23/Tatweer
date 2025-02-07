@@ -44,8 +44,8 @@ export type User = Admin | Manager;
 
 // Define the structure for sign-in result
 export type SignInResult =
-   {
+  {
     user: User;
-      token: string;
-      
-    }
+    token: string;
+
+  }

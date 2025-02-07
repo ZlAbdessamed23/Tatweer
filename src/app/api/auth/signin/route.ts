@@ -8,6 +8,7 @@ import { requiredSignInFields } from "@/app/api/auth/signin/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
+   console.log("hello from login")
     const data: SignInData = await req.json();
     const missingFields = requiredSignInFields.filter(
           (field) => !data[field]

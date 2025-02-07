@@ -139,8 +139,8 @@ async function handleAdminSignIn(admin: Admin): Promise<SignInResult> {
   const { subscriptionEndDate, subscriptionPlan } = admin.managedCompany.companySubscription;
   
   if (subscriptionEndDate < new Date()) {
-    
-    throw new SubscriptionError("Subscription expired");
+    const session = await createStripeCheckoutSession(subscriptionPlan, admin.managedCompany.companyId);
+    throw new SubscriptionError("L'abonnement a expiré");
   }
 
   const token = await generateToken(
