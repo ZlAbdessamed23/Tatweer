@@ -1,5 +1,13 @@
 import { DepartmentType, ColumnType } from '@/app/types/constant';
 
+export type UserType = "admin" | "manager";
+
+interface User {
+  userEmail: string;
+  password: string;
+  userType: UserType;
+};
+
 export interface Admin {
   adminId: string;
   adminFirstName: string;
@@ -10,7 +18,7 @@ export interface Admin {
   managedCompany?: Company;
   emailVerificationToken?: EmailVerificationToken;
   assignedTasks: Task[];
-}
+};
 
 export interface Company {
   companyId: string;
@@ -24,7 +32,7 @@ export interface Company {
   companyManagers: Manager[];
   companyDepartments: Department[];
   companySubscription?: Subscription;
-}
+};
 
 export interface Manager {
   managerId: string;
