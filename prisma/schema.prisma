@@ -128,8 +128,8 @@ model DepartmentManager {
   departmentId   String
   managerId      String
   
-  managedDepartment Department @relation("DepartmentToManagers", fields: [departmentId], references: [departmentId])
-  departmentManager Manager    @relation("ManagerToDepartments", fields: [managerId], references: [managerId])
+  managedDepartment Department @relation("DepartmentToManagers", fields: [departmentId], references: [departmentId],onDelete: Cascade)
+  departmentManager Manager    @relation("ManagerToDepartments", fields: [managerId], references: [managerId],onDelete: Cascade)
 
   @@id([departmentId, managerId])
 }
@@ -141,7 +141,7 @@ model Table {
   tableCreatedAt    DateTime  @default(now())
   tableUpdatedAt    DateTime  @updatedAt
   
-  tableDepartment   Department @relation("DepartmentToTables", fields: [tableDepartmentId], references: [departmentId])
+  tableDepartment   Department @relation("DepartmentToTables", fields: [tableDepartmentId], references: [departmentId],onDelete: Cascade)
   tableColumns      Column[]   @relation("TableToColumns")
   tableRows         Row[]      @relation("TableToRows")
 }

@@ -23,7 +23,22 @@ import {
     "managerPassword",
   ];
   export type Manager = {
-    Manager:Prisma.ManagerGetPayload<{}>
+    Manager:Prisma.ManagerGetPayload<{select: {
+      managerId: true,
+      managerFirstName: true,
+      managerLastName: true,
+      managerEmail: true,
+      managerIsActivated: true,
+      managedDepartments: {
+        select: {
+          managedDepartment: {
+            select: {
+              departmentName: true
+            }
+          }
+        }
+      }
+    }}>
   }
   export type Managers = {
     Managers:Prisma.ManagerGetPayload<{select: {

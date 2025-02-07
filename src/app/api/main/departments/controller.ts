@@ -10,7 +10,7 @@ import { throwAppropriateError } from "@/lib/error-handler/throwError";
 export async function addDepartment(
   data: AddDepartmentData,
   companyId: string,
-  managerId: string
+  
 ): Promise<DepartmentResult> {
   try {
     return await prisma.$transaction(async (prisma) => {
@@ -41,16 +41,7 @@ export async function addDepartment(
         );
       }
 
-      // Verify manager exists
-      const manager = await prisma.manager.findUnique({
-        where: { managerId },
-        select: { managerId: true }
-      });
-
-      if (!manager) {
-        throw new NotFoundError("Manager non trouvé");
-      }
-
+     
       // Filter valid manager access
       const validManagerAccess = data.managerAccess.filter(
         (ma) => ma.managerId !== ""
@@ -65,7 +56,6 @@ export async function addDepartment(
           departmentManagers: {
             create: [
               // Connect the creating manager
-              { departmentManager: { connect: { managerId } } },
               // Connect additional managers
               ...validManagerAccess.map((ma) => ({
                 departmentManager: { connect: { managerId: ma.managerId } },

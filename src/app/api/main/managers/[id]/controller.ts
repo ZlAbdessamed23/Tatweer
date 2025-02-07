@@ -86,7 +86,7 @@ export async function updateManager(
   data: UpdateManagerData
 ): Promise<Manager> {
   try {
-    let updateData: Prisma.ManagerUpdateInput = {};
+    const updateData: Prisma.ManagerUpdateInput = {};
 
     // Map UpdateManagerData to ManagerUpdateInput
     if (data.managerFirstName) {
@@ -96,7 +96,7 @@ export async function updateManager(
       updateData.managerLastName = data.managerLastName;
     }
     if (data.managerPassword) {
-      updateData.managerPassword = data.managerPassword;
+      updateData.managerPassword = await hashPassword(data.managerPassword);
     }
 
     const updatedManager = await prisma.manager.update({

@@ -236,7 +236,7 @@ export async function sendVerificationEmail(
       `
     );
   } catch (error) {
-
+    console.log(error);
     throw new InternalServerError("Echec à l'envoie de l'email , réessayer plus tard");
   }
 }

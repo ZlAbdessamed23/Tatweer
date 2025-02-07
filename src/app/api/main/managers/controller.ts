@@ -44,6 +44,22 @@ export async function addManager(
         }),
         prisma.manager.findUnique({
           where: { managerEmail: data.managerEmail },
+          select: {
+            managerId: true,
+            managerFirstName: true,
+            managerLastName: true,
+            managerEmail: true,
+            managerIsActivated: true,
+            managedDepartments: {
+              select: {
+                managedDepartment: {
+                  select: {
+                    departmentName: true
+                  }
+                }
+              }
+            }
+          }
         }),
       ]);
 
@@ -73,6 +89,22 @@ export async function addManager(
           managerCompanyId: companyId,
           managerIsActivated: false
         },
+        select: {
+          managerId: true,
+          managerFirstName: true,
+          managerLastName: true,
+          managerEmail: true,
+          managerIsActivated: true,
+          managedDepartments: {
+            select: {
+              managedDepartment: {
+                select: {
+                  departmentName: true
+                }
+              }
+            }
+          }
+        }
       });
 
       // Generate token and create verification token
@@ -86,7 +118,7 @@ export async function addManager(
             emailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
           },
         }),
-        sendVerificationEmail(newManager.managerEmail, token, newManager.managerFirstName)
+        sendVerificationEmail(newManager.managerEmail, token)
       ]);
 
       return {Manager: newManager};
@@ -100,7 +132,7 @@ export async function addManager(
 async function sendVerificationEmail(
   email: string,
   token: string,
-  firstName: string
+  
 ): Promise<void> {
   const verificationLink = `${process.env.BASE_URL}/${token}`;
   await sendMail(

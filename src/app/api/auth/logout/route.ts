@@ -1,7 +1,7 @@
 import { handleError } from "@/lib/error-handler/handleError";
-import { NextRequest, NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     // Create a response that will be used to clear the cookie
     const response = NextResponse.json(

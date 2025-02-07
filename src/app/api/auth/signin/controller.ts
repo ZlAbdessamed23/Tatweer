@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma/prismaClient";
 import bcrypt from "bcrypt";
-import Stripe from "stripe";
+
 import { SignJWT } from "jose";
 import { generateVerificationToken } from "@/lib/third-party/email/generateVerificationToken";
 import { sendMail } from "@/lib/third-party/email/sendMail";
@@ -9,7 +9,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   AccountNotActivatedError,
-  PaymentError,
+  
   SubscriptionError,
 } from "@/lib/error-handler/customeErrors";
 import {
@@ -21,9 +21,9 @@ import {
 
 } from "@/app/api/auth/signin/types";
 import { throwAppropriateError } from "@/lib/error-handler/throwError";
-import {  PrismaClient, Plan } from "@prisma/client";
+import {  PrismaClient } from "@prisma/client";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+//const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 
 
@@ -232,8 +232,8 @@ async function handleAdminSignIn(admin: Admin): Promise<SignInResult> {
   const { subscriptionEndDate, subscriptionPlan } = admin.managedCompany.companySubscription;
   
   if (subscriptionEndDate < new Date()) {
-    const session = await createStripeCheckoutSession(subscriptionPlan, admin.managedCompany.companyId);
-    throw new SubscriptionError("L'abonnement a expiré", { redirectUrl: session });
+    
+    throw new SubscriptionError("Subscription expired");
   }
 
   const token = await generateToken(
@@ -271,7 +271,7 @@ async function handleManagerSignIn(manager: Manager): Promise<SignInResult> {
   return { user: manager, token };
 }
 
-async function createStripeCheckoutSession(
+/*async function createStripeCheckoutSession(
   plan: Plan,
   companyId: string
 ): Promise<string> {
@@ -295,6 +295,7 @@ async function createStripeCheckoutSession(
 
     return session.url as string;
   } catch (error) {
-    throw new PaymentError("Échec de la création de la session de paiement");
+    console.log(error)
+    throw new PaymentError("Échec de la création de la session de paiement",);  
   }
-}
+}*/
