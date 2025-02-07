@@ -1,8 +1,14 @@
 import React from 'react'
 
+import PersonalInformationForm from '@/app/components/AuthComps/LoginForm'
+
 const Signup = () => {
   return (
-    <div>Signup</div>
+ <>
+ <PersonalInformationForm>
+
+ </PersonalInformationForm>
+ </>
   )
 }
 
