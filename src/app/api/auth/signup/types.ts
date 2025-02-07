@@ -5,7 +5,6 @@ export type AdminSignupData = {
   adminLastName: string;
   adminPassword: string;
   adminEmail: string;
-  adminPhoneNumber: string;
   companyName: string;
   companyLocation: string;
   companyPhoneNumber: string;
@@ -19,7 +18,6 @@ export const requiredFields: (keyof AdminSignupData)[] = [
   "adminLastName",
   "adminPassword",
   "adminEmail",
-  "adminPhoneNumber",
   "companyName",
   "companyLocation",
   "companyPhoneNumber",

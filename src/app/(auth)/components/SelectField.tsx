@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { IconType } from 'react-icons';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormSetValue } from 'react-hook-form';
 
 interface SelectFieldProps {
     placeholder?: string;
     Icon: IconType;
     name: string;
-    register: UseFormRegister<any>;
+    setValue: UseFormSetValue<any>; // Use setValue prop
     options: { value: string; label: string; }[];
 }
 
@@ -15,7 +15,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
     placeholder = '',
     Icon,
     name,
-    register,
+    setValue,
     options
 }) => {
     const [isFocused, setIsFocused] = useState(false);
@@ -51,9 +51,10 @@ const SelectField: React.FC<SelectFieldProps> = ({
             </AnimatePresence>
 
             <motion.select
-                {...register(name, {
-                    onChange: (e) => setHasContent(e.target.value !== ''),
-                })}
+                onChange={(e) => {
+                    setHasContent(e.target.value !== '');
+                    setValue(name, e.target.value);
+                }}
                 onFocus={() => setIsFocused(true)}
                 onBlur={(e) => {
                     setIsFocused(false);
@@ -65,7 +66,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
                 transition={{ duration: 0.2 }}
                 className="w-full pr-4 py-2 h-10 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md bg-white appearance-none"
             >
-                <option value="">Select...</option>
+                <option value="">{placeholder}</option>
                 {options.map((option) => (
                     <option key={option.value} value={option.value}>
                         {option.label}

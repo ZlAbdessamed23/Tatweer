@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 import { User } from '@/app/api/auth/signin/types'
 
 const Login = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<User>();
+  const { setValue, handleSubmit, formState: { errors } } = useForm<User>();
 
   const userTypeOptions = [
     { value: "admin", label: "Admin" },
@@ -45,20 +45,20 @@ const Login = () => {
           placeholder="Email"
           Icon={MdEmail}
           name="userEmail"
-          register={register}
+          setValue={setValue} // Use setValue
         />
         <InputField
           type="password"
           placeholder="Password"
           Icon={MdLock}
           name="password"
-          register={register}
+          setValue={setValue} // Use setValue
         />
         <SelectField
           placeholder="User Type"
           Icon={MdPersonOutline}
           name="userType"
-          register={register}
+          setValue={setValue} // Use setValue
           options={userTypeOptions}
         />
       </div>

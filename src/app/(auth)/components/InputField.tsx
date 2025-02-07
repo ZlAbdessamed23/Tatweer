@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { IconType } from 'react-icons';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormSetValue } from 'react-hook-form';
 
 interface InputFieldProps {
   type?: string;
   placeholder?: string;
   Icon: IconType;
   name: string;
-  register: UseFormRegister<any>;
+  setValue: UseFormSetValue<any>; // Only setValue prop
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -16,7 +16,7 @@ const InputField: React.FC<InputFieldProps> = ({
   placeholder = '',
   Icon,
   name,
-  register
+  setValue // Only setValue prop
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasContent, setHasContent] = useState(false);
@@ -53,9 +53,10 @@ const InputField: React.FC<InputFieldProps> = ({
 
       <motion.input
         type={type}
-        {...register(name, {
-          onChange: (e) => setHasContent(e.target.value !== '')
-        })}
+        onChange={(e) => {
+          setHasContent(e.target.value !== '');
+          setValue(name, e.target.value);
+        }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         animate={{
