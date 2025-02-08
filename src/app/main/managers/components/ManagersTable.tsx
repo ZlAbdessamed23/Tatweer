@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { FaSort, FaSortUp, FaSortDown, FaEllipsisV, FaEdit, FaTrash } from 'react-icons/fa';
 
@@ -16,7 +15,6 @@ interface ManagersTableProps {
   onDelete?: (managerId: string) => void;
 }
 
-// Custom Dropdown Component
 const ActionDropdown: React.FC<{
   onUpdate: () => void;
   onDelete: () => void;
@@ -44,7 +42,7 @@ const ActionDropdown: React.FC<{
         <FaEllipsisV />
       </button>
       {isOpen && (
-        <div className="absolute right-0 z-10 w-36 bg-white border rounded-md overflow-hidden shadow-lg">
+        <div className="fixed transform translate-x-[-90%] z-50 w-36 bg-white border rounded-md shadow-lg mt-2">
           <button 
             onClick={() => { onUpdate(); setIsOpen(false); }}
             className="flex items-center w-full p-2 text-left hover:bg-gray-100"
@@ -71,9 +69,8 @@ const ManagersTable: React.FC<ManagersTableProps> = ({
   const [sortConfig, setSortConfig] = useState<{
     key: keyof Manager;
     direction: 'ascending' | 'descending';
-  }>({ key: 'managerId', direction: 'ascending' });
+  }>({ key: 'managerFirstName', direction: 'ascending' });
 
-  // Sorting logic
   const sortedManagers = useMemo(() => {
     if (!managers.length) return [];
 
@@ -88,7 +85,6 @@ const ManagersTable: React.FC<ManagersTableProps> = ({
     });
   }, [managers, sortConfig]);
 
-  // Handle column header click for sorting
   const handleSort = (key: keyof Manager) => {
     setSortConfig(prev => ({
       key,
@@ -98,7 +94,6 @@ const ManagersTable: React.FC<ManagersTableProps> = ({
     }));
   };
 
-  // Sorting icon component
   const SortIcon = ({ isActive, direction }: { 
     isActive: boolean; 
     direction: 'ascending' | 'descending' 
@@ -110,43 +105,46 @@ const ManagersTable: React.FC<ManagersTableProps> = ({
   };
 
   return (
-    <div className="w-full">
-      <table className="w-full bg-white rounded-xl border-2 border-main-blue overflow-hidden">
-        <thead>
-          <tr>
-            {(['managerFirstName', 'managerLastName', 'managerEmail'] as (keyof Manager)[]).map(key => (
-              <th 
-                key={key} 
-                onClick={() => handleSort(key)}
-                className="p-3 text-left cursor-pointer text-main-blue font-light text-md hover:bg-gray-100"
-              >
-                {key.replace('manager', '').replace(/([A-Z])/g, ' $1')}
-                <SortIcon 
-                  isActive={sortConfig.key === key}
-                  direction={sortConfig.direction}
-                />
-              </th>
-            ))}
-            <th className="p-3 text-left text-main-blue font-light text-md">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedManagers.map(manager => (
-            <tr key={manager.managerId} className="hover:bg-gray-50 text-base font-light">
-              <td className="p-3">{manager.managerId}</td>
-              <td className="p-3">{manager.managerFirstName}</td>
-              <td className="p-3">{manager.managerLastName}</td>
-              <td className="p-3">{manager.managerEmail}</td>
-              <td className="p-3">
-                <ActionDropdown 
-                  onUpdate={() => onUpdate && onUpdate(manager)}
-                  onDelete={() => onDelete && onDelete(manager.managerId)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="w-full rounded-xl">
+      <div className="rounded-xl border-2 border-main-blue">
+        <div className="overflow-x-auto">
+          <table className="w-full bg-white">
+            <thead>
+              <tr>
+                {(['managerFirstName', 'managerLastName', 'managerEmail'] as (keyof Manager)[]).map(key => (
+                  <th 
+                    key={key} 
+                    onClick={() => handleSort(key)}
+                    className="p-3 text-left cursor-pointer text-main-blue font-light text-md hover:bg-gray-100"
+                  >
+                    {key.replace('manager', '').replace(/([A-Z])/g, ' $1').trim()}
+                    <SortIcon 
+                      isActive={sortConfig.key === key}
+                      direction={sortConfig.direction}
+                    />
+                  </th>
+                ))}
+                <th className="p-3 text-left text-main-blue font-light text-md">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedManagers.map(manager => (
+                <tr key={manager.managerId} className="hover:bg-gray-50 text-base font-light">
+                  <td className="p-3">{manager.managerFirstName}</td>
+                  <td className="p-3">{manager.managerLastName}</td>
+                  <td className="p-3">{manager.managerEmail}</td>
+                  <td className="p-3">
+                    <ActionDropdown 
+                      onUpdate={() => onUpdate && onUpdate(manager)}
+                      onDelete={() => onDelete && onDelete(manager.managerId)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

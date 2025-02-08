@@ -1,63 +1,133 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaChevronDown } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { addTask, updateTask, getManagers } from '@/app/utils/utils';
 
 interface Task {
     taskId?: string;
     taskTitle: string;
     taskDescription: string;
     taskCreatedAt: Date;
-    taskDueDate: Date;
+    taskDueDate: Date | string;
     taskStatus: string;
-};
+    taskManager: string;
+}
+
+interface Manager {
+    managerId: string;
+    managerFirstName: string;
+    managerLastName: string;
+}
 
 interface TaskModalProps {
     isOpen: boolean;
     onClose: () => void;
     task?: Task | null;
-};
+    onTaskUpdate?: (updatedTask: Task) => void;  // Add this callback
+}
 
-const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
+const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task, onTaskUpdate }) => {
+    const [selectedStatus, setSelectedStatus] = useState<string>(task?.taskStatus || 'Pending');
+    const [selectedManager, setSelectedManager] = useState<string>(task?.taskManager || '');
+    const [managers, setManagers] = useState<Manager[]>([]);
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+    const [isManagerDropdownOpen, setIsManagerDropdownOpen] = useState(false);
+
+    const statusDropdownRef = useRef<HTMLDivElement>(null);
+    const managerDropdownRef = useRef<HTMLDivElement>(null);
+
     const {
         register,
         handleSubmit,
-        setValue,
-        watch,
         reset,
-        formState: { errors }
+        formState: { errors },
     } = useForm<Task>({
         defaultValues: {
-            taskId: task?.taskId || '',
             taskTitle: task?.taskTitle || '',
             taskDescription: task?.taskDescription || '',
-            taskCreatedAt: task?.taskCreatedAt || new Date(),
-            taskDueDate: task?.taskDueDate || new Date(),
-            taskStatus: task?.taskStatus || 'Pending'
+            taskDueDate: task?.taskDueDate ? new Date(task.taskDueDate).toISOString().split('T')[0] : '',
+            taskStatus: selectedStatus,
+            taskManager: selectedManager
         }
     });
 
-    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-    const statusDropdownRef = useRef<HTMLDivElement>(null);
-    const selectedStatus = watch('taskStatus');
+    // Reset form and states when modal opens/closes or task changes
+    useEffect(() => {
+        if (isOpen && task) {
+            setSelectedStatus(task.taskStatus);
+            setSelectedManager(task.taskManager);
+            reset({
+                taskTitle: task.taskTitle,
+                taskDescription: task.taskDescription,
+                taskDueDate: new Date(task.taskDueDate).toISOString().split('T')[0],
+                taskStatus: task.taskStatus,
+                taskManager: task.taskManager
+            });
+        } else if (!isOpen) {
+            setSelectedStatus('Pending');
+            setSelectedManager('');
+            reset();
+        }
+    }, [isOpen, task, reset]);
 
-    // Close status dropdown when clicking outside
+    // Fetch managers
+    useEffect(() => {
+        const fetchManagers = async () => {
+            try {
+                const data = await getManagers();
+                setManagers(data.Managers as Manager[]);
+            } catch (error) {
+                toast.error('Failed to load managers');
+            }
+        };
+        if (isOpen) fetchManagers();
+    }, [isOpen]);
+
+    // Handle clicks outside dropdowns
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
                 setIsStatusDropdownOpen(false);
+            }
+            if (managerDropdownRef.current && !managerDropdownRef.current.contains(event.target as Node)) {
+                setIsManagerDropdownOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const onSubmit = (data: Task) => {
+    const onSubmit = async (formData: Task) => {
+        const finalData = {
+            ...formData,
+            taskStatus: selectedStatus,
+            taskManager: selectedManager,
+            taskId: task?.taskId,
+            taskDueDate: task?.taskDueDate.toString() ? new Date(task?.taskDueDate.toString()) : new Date()
+        };
+
         try {
-            // Implement submission logic here
+            let result;
+            if (task) {
+                result = updateTask(finalData);
+            } else {
+                result = addTask(finalData);
+            }
+
+            await toast.promise(result, {
+                loading: 'Loading...',
+                success: (message) => `${message}`,
+                error: (err) => `${err.toString()}`,
+            });
+
+            if (onTaskUpdate) {
+                onTaskUpdate(finalData);
+            }
+
             onClose();
             reset();
         } catch (error) {
@@ -65,10 +135,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
         }
     };
 
-    const onError = (errors: Record<string, any>) => {
-        Object.values(errors).forEach((error) => {
-            toast.error(error.message || 'Validation error');
-        });
+    const handleStatusChange = (status: string) => {
+        setSelectedStatus(status);
+        setIsStatusDropdownOpen(false);
+    };
+
+    const handleManagerChange = (managerId: string) => {
+        setSelectedManager(managerId);
+        setIsManagerDropdownOpen(false);
     };
 
     return (
@@ -98,7 +172,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                             <input
                                 {...register('taskTitle', { required: 'Task Title is required' })}
                                 placeholder="Task Title"
@@ -115,14 +189,15 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
                                 className="w-full p-2 border rounded"
                             />
 
-                            {/* Task Status Dropdown */}
+                            {/* Status Dropdown */}
                             <div className="relative" ref={statusDropdownRef}>
                                 <button
                                     type="button"
                                     className="w-full flex justify-between items-center p-2 border rounded bg-white"
                                     onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
                                 >
-                                    {selectedStatus ? selectedStatus : 'Select Task Status'} <FaChevronDown />
+                                    <span>{selectedStatus}</span>
+                                    <FaChevronDown />
                                 </button>
                                 {isStatusDropdownOpen && (
                                     <div className="absolute w-full bg-white border rounded-md mt-1 shadow-lg z-10">
@@ -131,12 +206,41 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
                                                 key={status}
                                                 type="button"
                                                 className="block w-full text-left p-2 hover:bg-gray-100"
-                                                onClick={() => {
-                                                    setValue('taskStatus', status);
-                                                    setIsStatusDropdownOpen(false);
-                                                }}
+                                                onClick={() => handleStatusChange(status)}
                                             >
                                                 {status}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Manager Dropdown */}
+                            <div className="relative" ref={managerDropdownRef}>
+                                <button
+                                    type="button"
+                                    className="w-full flex justify-between items-center p-2 border rounded bg-white"
+                                    onClick={() => setIsManagerDropdownOpen(!isManagerDropdownOpen)}
+                                >
+                                    <span>
+                                        {selectedManager
+                                            ? managers.find(m => m.managerId === selectedManager)
+                                                ? `${managers.find(m => m.managerId === selectedManager)?.managerFirstName} ${managers.find(m => m.managerId === selectedManager)?.managerLastName}`
+                                                : 'Select Manager'
+                                            : 'Select Manager'}
+                                    </span>
+                                    <FaChevronDown />
+                                </button>
+                                {isManagerDropdownOpen && (
+                                    <div className="absolute w-full bg-white border rounded-md mt-1 shadow-lg z-10 max-h-48 overflow-y-auto">
+                                        {managers.map((manager) => (
+                                            <button
+                                                key={manager.managerId}
+                                                type="button"
+                                                className="block w-full text-left p-2 hover:bg-gray-100"
+                                                onClick={() => handleManagerChange(manager.managerId)}
+                                            >
+                                                {manager.managerFirstName} {manager.managerLastName}
                                             </button>
                                         ))}
                                     </div>

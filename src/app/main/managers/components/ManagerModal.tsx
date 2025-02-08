@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { addManager, updateManager } from '@/app/utils/utils';
 
 interface Manager {
   managerId?: string;
@@ -25,24 +26,51 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
   onClose,
   manager
 }) => {
-  const { 
-    register, 
-    handleSubmit, 
-    reset, 
-    formState: { errors } 
-  } = useForm<Manager>({
-    defaultValues: {
-      managerId: manager?.managerId || '',
-      managerFirstName: manager?.managerFirstName || '',
-      managerLastName: manager?.managerLastName || '',
-      managerEmail: manager?.managerEmail || '',
-      managerPassword: manager?.managerPassword || ''
-    }
-  });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm<Manager>();
 
-  const onSubmit = (data: Manager) => {
+  // Reset form when manager prop changes
+  useEffect(() => {
+    if (manager) {
+      reset({
+        managerId: manager.managerId,
+        managerFirstName: manager.managerFirstName,
+        managerLastName: manager.managerLastName,
+        managerEmail: manager.managerEmail,
+        managerPassword: manager.managerPassword
+      });
+    } else {
+      reset({
+        managerId: '',
+        managerFirstName: '',
+        managerLastName: '',
+        managerEmail: '',
+        managerPassword: ''
+      });
+    }
+  }, [manager, reset]);
+
+  const onSubmit = async (data: Manager) => {
     try {
-      // Implement submission logic here
+      let result;
+      if (manager) {
+        // Update manager
+        result = updateManager(data);
+      } else {
+        // Add new manager
+        result = addManager(data);
+      }
+
+      await toast.promise(result, {
+        loading: 'Loading...',
+        success: (message) => `${message}`,
+        error: (err) => `${err.toString()}`,
+      });
+
       onClose();
       reset();
     } catch (error) {
@@ -50,7 +78,6 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
     }
   };
 
-  // New error callback function for form submission errors
   const onError = (errors: Record<string, any>) => {
     Object.values(errors).forEach((error) => {
       toast.error(error.message || 'Validation error');
@@ -101,7 +128,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
               />
 
               <input
-                {...register('managerEmail', { 
+                {...register('managerEmail', {
                   required: 'Email is required',
                   pattern: {
                     value: /\S+@\S+\.\S+/,
@@ -114,7 +141,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
               />
 
               <input
-                {...register('managerPassword', { 
+                {...register('managerPassword', {
                   required: 'Password is required',
                   minLength: {
                     value: 6,

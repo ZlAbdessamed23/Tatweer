@@ -1,80 +1,48 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaPlus } from 'react-icons/fa';
-import DepartmentModal, { DepartmentType } from './components/DepartemenetModal';
+import DepartmentModal from './components/DepartemenetModal';
 import DepartementDisplay from './components/DepartementDisplay';
+import { DepartmentType } from '@/app/types/constant';
+import toast from 'react-hot-toast';
+import { getDepartments } from '@/app/utils/utils';
 
-const fakeDepartments = [
-    {
-        departmentId: "DEP001",
-        departmentName: "Sales",
-        departmentType: DepartmentType.sales,
-        departmentManagers: ["MGR001", "MGR002"]
-    },
-    {
-        departmentId: "DEP002",
-        departmentName: "Marketing",
-        departmentType: DepartmentType.marketing,
-        departmentManagers: ["MGR003"]
-    },
-    {
-        departmentId: "DEP003",
-        departmentName: "Finance",
-        departmentType: DepartmentType.finance,
-        departmentManagers: ["MGR004", "MGR005"]
-    },
-    {
-        departmentId: "DEP004",
-        departmentName: "Human Resources",
-        departmentType: DepartmentType.humanResources,
-        departmentManagers: ["MGR006"]
-    },
-    {
-        departmentId: "DEP005",
-        departmentName: "Operations",
-        departmentType: DepartmentType.operations,
-        departmentManagers: ["MGR007", "MGR008"]
-    },
-    {
-        departmentId: "DEP006",
-        departmentName: "Engineering",
-        departmentType: DepartmentType.engineering,
-        departmentManagers: ["MGR009"]
-    },
-    {
-        departmentId: "DEP007",
-        departmentName: "Product",
-        departmentType: DepartmentType.product,
-        departmentManagers: ["MGR010"]
-    },
-    {
-        departmentId: "DEP008",
-        departmentName: "Design",
-        departmentType: DepartmentType.design,
-        departmentManagers: ["MGR001", "MGR003"]
-    },
-    {
-        departmentId: "DEP009",
-        departmentName: "Customer Support",
-        departmentType: DepartmentType.customerSupport,
-        departmentManagers: ["MGR002"]
-    },
-    {
-        departmentId: "DEP010",
-        departmentName: "Data Science",
-        departmentType: DepartmentType.dataScience,
-        departmentManagers: ["MGR004", "MGR006"]
-    }
-];
+interface Department {
+    departmentId: string;
+    departmentName: string;
+    departmentType: DepartmentType;
+    departmentManagers: string[];
+}
 
 const Departements = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedDepartement, setSelectedDepartement] = useState(null);
+    const [selectedDepartement, setSelectedDepartement] = useState<Department | null>(null);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch departments on component mount
+    useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                setIsLoading(true);
+                const response = await getDepartments();
+                setDepartments(response.Departments as Department[]);
+            } catch (error) {
+                setError(error instanceof Error ? error.message : 'Failed to fetch departments');
+                toast.error('Failed to fetch departments');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDepartments();
+    }, []);
 
     // Filter departments based on search input
-    const filteredDepartments = fakeDepartments.filter((dep) =>
+    const filteredDepartments = departments.filter((dep) =>
         dep.departmentName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -102,14 +70,36 @@ const Departements = () => {
                     <span>Add</span>
                 </button>
             </div>
-            <DepartmentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-            <div className='flex flex-col gap-6'>
-                {filteredDepartments.length > 0 ? (
-                    filteredDepartments.map((dep) => <DepartementDisplay key={dep.departmentId} props={dep} />)
-                ) : (
-                    <p className="text-gray-500 text-center">No departments found.</p>
-                )}
-            </div>
+
+            {/* Display loading or error state */}
+            {isLoading ? (
+                <div className="text-center py-4">Loading departments...</div>
+            ) : error ? (
+                <div className="text-center text-red-500 py-4">{error}</div>
+            ) : (
+                <>
+                    <DepartmentModal 
+                        isOpen={isModalOpen} 
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedDepartement(null);
+                        }} 
+                        department={selectedDepartement}
+                    />
+                    <div className='flex flex-col gap-6'>
+                        {filteredDepartments.length > 0 ? (
+                            filteredDepartments.map((dep) => (
+                                <DepartementDisplay 
+                                    key={dep.departmentId} 
+                                    props={dep} 
+                                />
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-center">No departments found.</p>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 };
