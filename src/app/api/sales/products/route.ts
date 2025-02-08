@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/error-handler/handleError";
-import { getUser } from "@/lib/token/getUserFromToken";
+// import { getUser } from "@/lib/token/getUserFromToken";
 
 
 export async function GET(request: NextRequest) {
   try {
+    console.log(request)
     // const user = getUser(request);
     // if (!user) {
     //     console.log(user)

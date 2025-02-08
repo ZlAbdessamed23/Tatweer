@@ -5,15 +5,12 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     FaHome,
-    FaChartLine,
     FaUserTie,
     FaChartPie,
-    FaCreditCard,
-    FaHandHoldingUsd,
-    FaRegWindowRestore,
     FaCog,
     FaShoppingCart,
-    FaTasks
+    FaTasks,
+    FaBoxes
 } from "react-icons/fa"
 import { BsTools } from "react-icons/bs";
 import { usePathname } from 'next/navigation'
@@ -71,6 +68,12 @@ export default function Sidebar() {
             title: "Managers",
             url: "/main/managers",
         },
+        {
+            icon: FaBoxes,
+            title: "stock",
+            url: "/main/stock",
+        },
+        
         {
             icon: FaShoppingCart,
             title: "sales",

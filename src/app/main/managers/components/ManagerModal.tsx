@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { FieldErrors, useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { addManager, updateManager } from '@/app/utils/utils';
+
+
+
 
 interface Manager {
   managerId?: string;
@@ -21,19 +24,10 @@ interface ManagerModalProps {
   manager?: Manager | null;
 }
 
-const ManagerModal: React.FC<ManagerModalProps> = ({
-  isOpen,
-  onClose,
-  manager
-}) => {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = useForm<Manager>();
+const ManagerModal: React.FC<ManagerModalProps> = ({ isOpen, onClose, manager }) => {
+  const { register, handleSubmit, reset } = useForm<Manager>();
 
-  // Reset form when manager prop changes
+  // Reset form when the manager prop changes
   useEffect(() => {
     if (manager) {
       reset({
@@ -78,12 +72,13 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
     }
   };
 
-  const onError = (errors: Record<string, any>) => {
-    Object.values(errors).forEach((error) => {
+  const onError = (formErrors: FieldErrors<Manager>) => {
+    Object.values(formErrors).forEach((error) => {
       toast.error(error.message || 'Validation error');
     });
   };
 
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -106,10 +101,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
               <h2 className="text-xl font-bold text-main-blue">
                 {manager ? 'Update Manager' : 'Add Manager'}
               </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
                 <FaTimes />
               </button>
             </div>

@@ -24,7 +24,8 @@ const Tasks = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
+
 
     // Fetch tasks from the API when the component mounts
     useEffect(() => {
@@ -33,16 +34,21 @@ const Tasks = () => {
                 setIsLoading(true);
                 const data = await getTasks();
                 setTasks(data.Tasks as Task[]); // Assuming the API returns { Tasks: Array<Task> }
-            } catch (error: any) {
-                setError(error.message);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    setError(error.message);
+                } else {
+                    setError('An unknown error occurred');
+                }
                 toast.error('Failed to fetch tasks');
             } finally {
                 setIsLoading(false);
             }
         };
-
+    
         fetchTasks();
     }, []);
+    
 
     // Filter tasks based on search input
     const filteredTasks = tasks.filter((task) =>
@@ -64,6 +70,7 @@ const Tasks = () => {
                 </div>
                 <button
                     onClick={() => {
+                        console.log(selectedTask)
                         setSelectedTask(null);
                         setIsModalOpen(true);
                     }}

@@ -3,7 +3,6 @@
 import React from 'react'
 import TrendsPieChart from './components/TrendsPieChart';
 import BankCardDisplay from './components/BankCardDisplay';
-import { FaCcMastercard } from "react-icons/fa";
 import CardForm from './components/CardForm';
 
 const Trends = () => {
@@ -50,7 +49,7 @@ const Trends = () => {
                 <div className='flex flex-col gap-8'>
                     <h2 className='text-xl text-main-blue font-medium'>Cards List</h2>
                     {
-                        fakeBankCardData.map((data) => (<BankCardDisplay props={data} />))
+                        fakeBankCardData.map((data,i) => (<BankCardDisplay key={i} props={data} />))
                     }
                 </div>
 
@@ -63,7 +62,7 @@ const Trends = () => {
                 <div className='flex flex-col gap-8'>
                     <h2 className='text-xl text-main-blue font-medium'>Cards List</h2>
                     {
-                        fakeBankCardData.map((data) => (<BankCardDisplay props={data} />))
+                        fakeBankCardData.map((data,i) => (<BankCardDisplay key={i} props={data} />))
                     }
                 </div>
 
