@@ -1,109 +1,144 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import mapboxgl from "mapbox-gl"
-import "mapbox-gl/dist/mapbox-gl.css"
-import { FaLaptop, FaMobileAlt, FaClock } from "react-icons/fa"
-import { motion } from "framer-motion"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { useEffect, useRef, useState } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { FaLaptop, FaMobileAlt, FaClock } from "react-icons/fa";
+import { motion } from "framer-motion";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
-const salesData = [
-  { month: "Jan", amount: 5000 },
-  { month: "Feb", amount: 22000 },
-  { month: "Mar", amount: 15000 },
-  { month: "Apr", amount: 35000 },
-  { month: "May", amount: 20000 },
-  { month: "Jun", amount: 28000 },
-]
+interface Product {
+  name: string;
+  price: number;
+  change: number;
+  // These may or may not be returned from your API.
+  bgColor?: string;
+  iconColor?: string;
+}
 
-const productsData = [
-  {
-    name: "iPhone 15 Pro",
-    price: 523,
-    change: -12,
-    icon: FaMobileAlt,
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-500",
-  },
-  {
-    name: "MacBook Air M2",
-    price: 20000,
-    change: 30,
-    icon: FaLaptop,
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-500",
-  },
-  {
-    name: "Apple Watch Series 9",
-    price: 13500,
-    change: 7,
-    icon: FaClock,
-    bgColor: "bg-cyan-50",
-    iconColor: "text-cyan-500",
-  },
-  {
-    name: "MacBook Pro 5",
-    price: 32871,
-    change: -2,
-    icon: FaLaptop,
-    bgColor: "bg-pink-50",
-    iconColor: "text-pink-500",
-  },
-]
+interface SalesData {
+  month: string;
+  amount: number;
+}
 
-const locationMarkers = [
-  { lng: -5.45, lat: 35.57, name: "Tangier" },
-  { lng: -7.58, lat: 33.57, name: "Casablanca" },
-  { lng: -6.83, lat: 34.01, name: "Rabat" },
-  { lng: -8.0, lat: 31.63, name: "Marrakech" },
-]
+interface LocationMarker {
+  lng: number;
+  lat: number;
+  name: string;
+  sales : number;
+  growth : number;
+}
+
+// Helper function to normalize API responses into an array
+function normalizeResponse<T>(response: any): T[] {
+  if (Array.isArray(response)) {
+    return response;
+  }
+  if (response && Array.isArray(response.data)) {
+    return response.data;
+  }
+  return [];
+}
 
 export default function SalesDashboard() {
-  const mapContainer = useRef(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [productsData, setProductsData] = useState<Product[]>([]);
+  const [locationMarkers, setLocationMarkers] = useState<LocationMarker[]>([]);
+
+  // Define a mapping from product names (or IDs) to icon components.
+  const iconMapping: { [key: string]: React.ElementType } = {
+    "iPhone 15 Pro": FaMobileAlt,
+    "MacBook Air M2": FaLaptop,
+    "Apple Watch Series 9": FaClock,
+    "MacBook Pro 5": FaLaptop,
+  };
 
   useEffect(() => {
-    if (!mapContainer.current) return
+    async function fetchData() {
+      try {
+        const [productsResponse, salesPredictionResponse, wilayaSalesResponse] =
+          await Promise.all([
+            fetch("/api/sales/products").then((res) => res.json()),
+            fetch("/api/sales/sales-prediction").then((res) => res.json()),
+            fetch("/api/sales/wilaya-sales").then((res) => res.json()),
+          ]);
 
+        // Normalize each response to ensure we have arrays
+        const products = normalizeResponse<Product>(productsResponse);
+        const salesPrediction = normalizeResponse<SalesData>(salesPredictionResponse);
+        const wilayaSales = normalizeResponse<LocationMarker>(wilayaSalesResponse);
+
+        setProductsData(products);
+        setSalesData(salesPrediction);
+        setLocationMarkers(wilayaSales);
+      } catch (error) {
+        console.error("Failed to fetch sales data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!mapContainer.current) return;
+  
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/navigation-day-v1",
-      center: [-6.5, 33.5],
-      zoom: 5.5,
-    })
+      center: [4.16, 34.75],
+      zoom: 2, // Start with a low zoom level
+    });
+  
     map.on("load", () => {
-        // Set initial far zoom level
-        map.setZoom(1);
-      
-        // Animate zoom to Algeria
-        setTimeout(() => {
-          map.flyTo({
-            center: [4.16,34.75], // Algeria's coordinates (longitude, latitude)
-            zoom: 5.5, // Adjust the zoom level as needed
-            speed: 1.5, // Adjust speed of the animation
-            curve: 1.5, // Adjust the easing of the animation
-          });
-        }, 1000); // Delay to ensure animation starts after map loads
-      
-        locationMarkers.forEach((marker) => {
-          const el = document.createElement("div");
-          
-            el.style.backgroundSize = "100%";
-          el.style.background = "linear-gradient(135deg, #ff7e5f, #feb47b)";
-
-        });
-      
-        setIsLoading(false);
-      });
-      
-      return () => map.remove();
-      
-  }, [])
+      map.flyTo({ zoom: 5.5, duration: 2000 }); // Animate zoom-in
+    });
+  
+    locationMarkers.forEach(({ lng, lat, name, sales, growth }) => {
+      const lngNum = typeof lng === "number" ? lng : parseFloat(lng);
+      const latNum = typeof lat === "number" ? lat : parseFloat(lat);
+  
+      if (isNaN(lngNum) || isNaN(latNum)) {
+        console.error(
+          `Invalid coordinates for marker "${name}": lng=${lng}, lat=${lat}`
+        );
+        return;
+      }
+  
+      // Create a popup with more details
+      const popupContent = `
+        <div style="font-size: 14px; font-family: Arial, sans-serif;">
+          <strong>${name}</strong><br/>
+          <span>📈 Sales: $${sales.toLocaleString()}</span><br/>
+          <span>📊 Growth: ${growth}%</span>
+        </div>
+      `;
+  
+      new mapboxgl.Marker()
+        .setLngLat([lngNum, latNum])
+        .setPopup(new mapboxgl.Popup().setHTML(popupContent))
+        .addTo(map);
+    });
+  
+    return () => map.remove();
+  }, [locationMarkers]);
+  
+  
 
   return (
-    <div className=" w-full  flex  flex-col gap-8  ">
+    <div className="w-full flex flex-col gap-8">
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -113,6 +148,7 @@ export default function SalesDashboard() {
       </motion.h1>
 
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* Sales Prediction Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -124,7 +160,11 @@ export default function SalesDashboard() {
               <LineChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `$${value.toLocaleString()}`} />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                />
                 <Tooltip />
                 <Line
                   type="monotone"
@@ -139,6 +179,7 @@ export default function SalesDashboard() {
           </div>
         </motion.div>
 
+        {/* Products Sales List */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -146,31 +187,41 @@ export default function SalesDashboard() {
         >
           <h2 className="text-lg font-semibold mb-4">Products Sales</h2>
           <div className="space-y-4 overflow-y-scroll">
-            {productsData.map((product, index) => (
-              <motion.div
-                key={product.name}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * (index + 1) }}
-                className="flex items-center gap-4"
-              >
-                <div className={`p-2 rounded-lg ${product.bgColor}`}>
-                  <product.icon className={`w-6 h-6 ${product.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{product.name}</h3>
-                  <p className="text-gray-500">${product.price.toLocaleString()}</p>
-                </div>
-                <span className={`${product.change > 0 ? "text-green-500" : "text-red-500"} font-medium`}>
-                  {product.change > 0 ? "+" : ""}
-                  {product.change}%
-                </span>
-              </motion.div>
-            ))}
+            {productsData.map((product, index) => {
+              // Use the icon mapping to get the corresponding icon component.
+              // If no mapping exists, fallback to FaLaptop.
+              const IconComponent = iconMapping[product.name] || FaLaptop;
+              return (
+                <motion.div
+                  key={product.name}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * (index + 1) }}
+                  className="flex items-center gap-4"
+                >
+                  <div className={`p-2 rounded-lg ${product.bgColor || "bg-gray-50"}`}>
+                    <IconComponent className={`w-6 h-6 ${product.iconColor || "text-gray-500"}`} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900">{product.name}</h3>
+                    <p className="text-gray-500">${product.price.toLocaleString()}</p>
+                  </div>
+                  <span
+                    className={`${
+                      product.change > 0 ? "text-green-500" : "text-red-500"
+                    } font-medium`}
+                  >
+                    {product.change > 0 ? "+" : ""}
+                    {product.change}%
+                  </span>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       </div>
 
+      {/* Sales Locations Map */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,6 +239,5 @@ export default function SalesDashboard() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
-
