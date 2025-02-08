@@ -1,98 +1,244 @@
 "use client"
 
-import React from 'react';
-import { FaPlus } from 'react-icons/fa';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useEffect, useState, useCallback } from "react"
+import { FiUpload, FiClipboard, FiX } from "react-icons/fi";
 
-interface IFormInputs {
-    department: string;
-    url: string;
+interface Department {
+  departmentId: string
+  departmentName: string
 }
 
-const Settings = () => {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        watch,
-        reset
-    } = useForm<IFormInputs>({
-        defaultValues: {
-            department: '',
-            url: ''
+type ImportMethod = "json" | "csv" | "database" | ""
+
+export default function DepartmentImportPage() {
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [importMethod, setImportMethod] = useState<ImportMethod>("")
+  const [databaseUrl, setDatabaseUrl] = useState<string>("")
+  const [dragActive, setDragActive] = useState<boolean>(false)
+  const [file, setFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch("/api/main/departments")
+        if (!response.ok) throw new Error("Failed to fetch departments")
+        const data = await response.json()
+        if (data.Departments && Array.isArray(data.Departments)) {
+          setDepartments(data.Departments)
         }
-    });
+      } catch (error) {
+        console.error("Error fetching departments:", error)
+      }
+    }
 
-    const onSubmit: SubmitHandler<IFormInputs> = (data) => {
-        console.log(data);
-        reset();
-    };
+    fetchDepartments()
+  }, [])
 
-    const handleAddUrl = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        const formData = {
-            department: watch('department'),
-            url: watch('url')
-        };
-        console.log('Added URL:', formData);
-        reset(); // Reset form after adding URL
-    };
+  const openModal = (department: Department) => {
+    setSelectedDepartment(department)
+    setIsModalOpen(true)
+  }
 
-    return (
-        <div className="w-full p-4">
-            <div className='flex flex-col gap-6 w-full'>
-                <form onSubmit={handleSubmit(onSubmit)} className='flex items-start gap-8 w-full'>
-                    <div className='flex flex-col gap-2 flex-1'>
-                        <label htmlFor="department">Department</label>
-                        <input
-                            id="department"
-                            type="text"
-                            {...register("department", {
-                                required: "Department is required",
-                                minLength: {
-                                    value: 2,
-                                    message: "Department must be at least 2 characters"
-                                }
-                            })}
-                            className='border border-main-blue rounded-xl p-4 h-11 w-full placeholder:text-main-blue placeholder:text-opacity-70'
-                            placeholder='Enter department name'
-                        />
-                        {errors.department && (
-                            <span className="text-red-500 text-sm">{errors.department.message}</span>
-                        )}
-                    </div>
-                    <div className='flex flex-col gap-2 flex-1'>
-                        <label htmlFor="url">URL</label>
-                        <div className="relative flex items-center w-full">
-                            <input
-                                id="url"
-                                type="text"
-                                {...register("url", {
-                                    required: "URL is required",
-                                    pattern: {
-                                        value: /^(http|https):\/\/[^ "]+$/,
-                                        message: "Please enter a valid URL"
-                                    }
-                                })}
-                                className='border border-main-blue rounded-xl p-4 h-11 w-full placeholder:text-main-blue placeholder:text-opacity-70'
-                                placeholder='Enter URL'
-                            />
-                            <button
-                                onClick={handleAddUrl}
-                                className='absolute right-2 bg-purple-600 p-2 rounded-lg hover:bg-purple-700 transition-colors'
-                                aria-label="Add URL"
-                            >
-                                <FaPlus className="text-white text-sm" />
-                            </button>
-                        </div>
-                        {errors.url && (
-                            <span className="text-red-500 text-sm">{errors.url.message}</span>
-                        )}
-                    </div>
-                </form>
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setImportMethod("")
+    setFile(null)
+    setDatabaseUrl("")
+  }
+
+  const handleConfirm = () => {
+    console.log(
+      "Launching import for department:",
+      selectedDepartment,
+      "with method:",
+      importMethod,
+      "file:",
+      file,
+      "database URL:",
+      databaseUrl,
+    )
+    closeModal()
+  }
+
+  const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0]
+      if (droppedFile.type === "application/json" || droppedFile.type === "text/csv") {
+        setFile(droppedFile)
+        setImportMethod(droppedFile.type === "application/json" ? "json" : "csv")
+      }
+    }
+  }, [])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0]
+      if (selectedFile.type === "application/json" || selectedFile.type === "text/csv") {
+        setFile(selectedFile)
+        setImportMethod(selectedFile.type === "application/json" ? "json" : "csv")
+      }
+    }
+  }
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      setDatabaseUrl(text)
+    } catch (error) {
+      console.error("Failed to read clipboard contents:", error)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-4xl font-bold mb-8 text-gray-800">Department Import</h1>
+
+      {departments.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {departments.map((dept) => (
+            <div
+              key={dept.departmentId}
+              className="flex flex-col rounded-[20px] bg-white shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-start px-6 pt-6 pb-3 gap-4">
+                <div className="p-3 rounded-full bg-[#F3E8FF]">
+                  <FiUpload size={24} className="text-[#9034E0]" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold mb-1 text-[#9034E0]">{dept.departmentName}</h2>
+                  <time className="text-sm text-gray-400">Ready for import</time>
+                </div>
+              </div>
+              <hr className="w-full mb-4 border-[#9034E0]" />
+              <p className="text-gray-600 px-6 pb-4 leading-relaxed">
+                Import data for {dept.departmentName} department. Choose from JSON, CSV, or database connection.
+              </p>
+              <div className="px-6 pb-6">
+                <button
+                  className="w-full bg-[#9034E0] text-white px-4 py-2 rounded-md hover:bg-[#7929C4] transition-colors duration-300 flex items-center justify-center"
+                  onClick={() => openModal(dept)}
+                >
+                  <FiUpload className="mr-2" size={18} />
+                  Import Data
+                </button>
+              </div>
             </div>
+          ))}
         </div>
-    );
-};
+      ) : (
+        <p className="text-xl text-gray-600">Loading departments...</p>
+      )}
 
-export default Settings;
+      {isModalOpen && selectedDepartment && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Import Data for {selectedDepartment.departmentName}
+              </h2>
+              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+                <FiX size={24} />
+              </button>
+            </div>
+            <p className="mb-4 text-gray-600">Select how you want to import the data:</p>
+            <div className="space-y-3">
+              {["json", "csv", "database"].map((method) => (
+                <label key={method} className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="importMethod"
+                    value={method}
+                    checked={importMethod === method}
+                    onChange={(e) => setImportMethod(e.target.value as ImportMethod)}
+                    className="mr-2 text-[#9034E0] focus:ring-[#9034E0]"
+                  />
+                  <span className="text-gray-700">
+                    {method === "database"
+                      ? "Connect via Database URL (Supabase)"
+                      : `Import ${method.toUpperCase()} File`}
+                  </span>
+                </label>
+              ))}
+            </div>
+            {(importMethod === "json" || importMethod === "csv") && (
+              <div
+                className={`mt-4 border-2 border-dashed rounded-lg p-4 text-center ${
+                  dragActive ? "border-[#9034E0]" : "border-gray-300"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  accept={importMethod === "json" ? ".json" : ".csv"}
+                  onChange={handleFileChange}
+                />
+                <label htmlFor="file-upload" className="cursor-pointer text-[#9034E0] hover:text-[#7929C4]">
+                  {file ? file.name : "Click to upload or drag and drop"}
+                </label>
+                <p className="text-sm text-gray-500 mt-2">{importMethod === "json" ? "JSON" : "CSV"} files only</p>
+              </div>
+            )}
+            {importMethod === "database" && (
+              <div className="mt-4 relative">
+                <input
+                  type="text"
+                  value={databaseUrl}
+                  onChange={(e) => setDatabaseUrl(e.target.value)}
+                  placeholder="Enter Database URL"
+                  className="w-full h-full text-center text-[#9034E0] outline-none border border-gray-300 rounded-lg py-2 pl-3 pr-10"
+                />
+                <button
+                  onClick={handlePaste}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#9034E0] hover:text-[#7929C4]"
+                  title="Paste from clipboard"
+                >
+                  <FiClipboard size={18} />
+                </button>
+              </div>
+            )}
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors duration-300 text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="px-4 py-2 bg-[#9034E0] text-white rounded-md hover:bg-[#7929C4] transition-colors duration-300"
+                disabled={
+                  !importMethod ||
+                  (importMethod !== "database" && !file) ||
+                  (importMethod === "database" && !databaseUrl)
+                }
+              >
+                Import
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+

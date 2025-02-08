@@ -28,16 +28,18 @@ const Profile: React.FC = () => {
             companyAddress: ''
         }
     });
-
+    
     const onSubmit: SubmitHandler<IFormInputs> = (data: IFormInputs): void => {
         try {
             console.log(data);
             toast.success('Profile updated successfully!');
             // Handle form submission here
         } catch (error) {
+            console.error(error); // Log the error
             toast.error('Something went wrong!');
         }
     };
+    
 
     React.useEffect(() => {
         // Show toast for any validation errors

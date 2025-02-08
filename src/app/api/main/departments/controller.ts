@@ -94,6 +94,7 @@ export async function getAllDepartments(
         departmentId: true,
         departmentName: true,
         departmentType: true,
+        departmentManagers : true
       },
     });
 

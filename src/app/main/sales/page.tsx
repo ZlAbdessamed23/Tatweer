@@ -40,12 +40,12 @@ interface LocationMarker {
 }
 
 // Helper function to normalize API responses into an array
-function normalizeResponse<T>(response: any): T[] {
+function normalizeResponse<T>(response: unknown): T[] {
   if (Array.isArray(response)) {
-    return response;
+    return response as T[];
   }
-  if (response && Array.isArray(response.data)) {
-    return response.data;
+  if (response && Array.isArray((response as { data: unknown }).data)) {
+    return (response as { data: unknown[] }).data as T[];
   }
   return [];
 }

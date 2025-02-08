@@ -11,27 +11,27 @@ import { handleError } from "@/lib/error-handler/handleError";
 
 import { DecodedToken } from "./lib/token/decodedToken";
 export async function middleware(request: NextRequest) {
-  console.log("inside middleware");
+  // console.log("inside middleware");
   // Only apply this middleware to /api/main routes
   if (!request.nextUrl.pathname.startsWith("/api/main")) {
-    console.log("don't need middleware");
+    // console.log("don't need middleware");
     return NextResponse.next();
   }
 
   const token = request.cookies.get("token")?.value;
-  console.log(token);
+  // console.log(token);
 
   if (!token) {
     return handleError(new AuthenticationError("Authentication required"));
   }
 
   try {
-    console.log(process.env.JWT_COMPANY_SECRET);
+    // console.log(process.env.JWT_COMPANY_SECRET);
     const secret = new TextEncoder().encode(process.env.JWT_COMPANY_SECRET); // Correct variable
 const { payload } = (await jwtVerify(token, secret)) as JWTVerifyResult & {
   payload: DecodedToken;
 };
-    console.log("after decode");
+    // console.log("after decode");
 
     // Check if token is expired
     if (Date.now() >= payload.exp * 1000) {

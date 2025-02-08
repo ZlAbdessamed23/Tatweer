@@ -14,7 +14,6 @@ import {
   ForbiddenError
 } from "@/lib/error-handler/customeErrors";
 import { throwAppropriateError } from "@/lib/error-handler/throwError";
-import { sendMail } from "@/lib/third-party/email/sendMail";
 import { generateVerificationToken } from "@/lib/third-party/email/generateVerificationToken";
 
 export async function addManager(

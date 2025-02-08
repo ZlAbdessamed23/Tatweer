@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/error-handler/handleError";
-import { getUser } from "@/lib/token/getUserFromToken";
+// import { getUser } from "@/lib/token/getUserFromToken";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     // if (!user) {
     //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     // }
-
+    console.log(request)
     const wilayaSales =[
       {
         "name": "Algiers",

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -28,15 +28,7 @@ interface DepartmentModalProps {
 }
 
 const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, department }) => {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    getValues,
-    watch,
-    reset,
-    formState: { errors }
-  } = useForm<Department>({
+  const { register, handleSubmit, setValue, getValues, watch, reset } = useForm<Department>({
     defaultValues: {
       departmentId: department?.departmentId || '',
       departmentName: department?.departmentName || '',
@@ -60,6 +52,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
         const data = await getManagers();
         setManagers(data.Managers as Manager[]);
       } catch (error) {
+        console.log(error);
         toast.error('Failed to load managers');
       }
     }
@@ -68,7 +61,10 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
 
   useEffect(() => {
     const handleClickOutsideManagers = (event: MouseEvent) => {
-      if (managersDropdownRef.current && !managersDropdownRef.current.contains(event.target as Node)) {
+      if (
+        managersDropdownRef.current &&
+        !managersDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsManagersDropdownOpen(false);
       }
     };
@@ -102,8 +98,8 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
     }
   };
 
-  const onError = (errors: Record<string, any>) => {
-    Object.values(errors).forEach((error) => {
+  const onError = (formErrors: Record<string, { message?: string }>) => {
+    Object.values(formErrors).forEach((error) => {
       toast.error(error.message || 'Validation error');
     });
   };
@@ -144,10 +140,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
               </h2>
               <div className="flex items-center gap-2">
                 {department && (
-                  <button
-                    onClick={handleDelete}
-                    className="text-red-500 hover:text-red-700"
-                  >
+                  <button onClick={handleDelete} className="text-red-500 hover:text-red-700">
                     Delete
                   </button>
                 )}
@@ -223,7 +216,10 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
                 )}
               </div>
 
-              <button type="submit" className="w-full bg-purple-600 text-white p-2 rounded-xl hover:opacity-90">
+              <button
+                type="submit"
+                className="w-full bg-purple-600 text-white p-2 rounded-xl hover:opacity-90"
+              >
                 {department ? 'Update' : 'Add'}
               </button>
             </form>
