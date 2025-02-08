@@ -172,3 +172,13 @@ interface BankCard {
   cardNumber: string;
   cardExpirationDate: string;
 };
+
+interface GenerateRequest {
+  department: DepartmentType;
+  companySize?: string;
+  industry?: string;
+  currentChallenges?: string;
+  budget?: string;
+  timeframe?: string;
+  conversation: string[];
+};
