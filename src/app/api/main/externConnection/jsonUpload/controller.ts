@@ -24,7 +24,7 @@ export async function addJsonUpload(
       const createdJsonUpload = await prisma.jsonUpload.create({
         data: {
           json: data.json,
-          jaosnDepartment: { connect: { departmentId: data.jsonDepartmentId } },
+          jsonDepartment: { connect: { departmentId: data.jsonDepartmentId } },
         },
         select: {
           id: true,

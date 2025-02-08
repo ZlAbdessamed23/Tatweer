@@ -6,7 +6,6 @@ import {
 } from "./types";
 import {
   NotFoundError,
-  LimitExceededError,
 } from "@/lib/error-handler/customeErrors";
 import { throwAppropriateError } from "@/lib/error-handler/throwError";
 

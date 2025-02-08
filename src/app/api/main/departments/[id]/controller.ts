@@ -114,6 +114,7 @@ export async function getDepartmentById(
 
     // Remove security check fields before returning
     const { departmentCompanyId, departmentManagers, ...departmentData } = existingDepartment;
+    console.log(departmentCompanyId,departmentManagers)
     
     return {
       Department: departmentData

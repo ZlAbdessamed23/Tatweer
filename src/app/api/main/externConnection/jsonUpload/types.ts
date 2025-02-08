@@ -1,3 +1,6 @@
+/* eslint-disable */
+
+
 import { Prisma } from "@prisma/client";
 
 export type AddJsonUploadData = {

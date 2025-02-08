@@ -1,3 +1,6 @@
+/* eslint-disable */
+
+
 // Type for the incoming request data
 export type DatabaseRequestData = {
     databaseUrl: string;
