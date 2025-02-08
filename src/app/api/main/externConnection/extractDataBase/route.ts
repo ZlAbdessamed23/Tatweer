@@ -12,9 +12,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Parse request body
-    const data: DatabaseRequestData = await request.json();
 
+    // console.log("the reequest arrive")
+    // Parse request body
+
+    const data: DatabaseRequestData = await request.json();
+    console.log(data)
     // Validate required fields
     const missingFields = requiredDatabaseFields.filter(
       (field) => !data[field]
@@ -26,9 +29,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 }
       );
     }
-
+    console.log(data)
     // Query the database
+
     const result = await queryDatabase(data);
+    console.log(result)
 
     // Return success response with the queried data
     return NextResponse.json(result, { status: 200 });

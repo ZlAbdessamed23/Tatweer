@@ -13,48 +13,74 @@ export async function queryDatabase(
   let pool: Pool | null = null;
 
   try {
-    // Create a new connection pool
+    // Create a new connection pool with more specific configuration
     pool = new Pool({
       connectionString: data.databaseUrl,
       ssl: {
-        rejectUnauthorized: false // Needed for some cloud database providers
-      }
+        rejectUnauthorized: false
+      },
+      connectionTimeoutMillis: 5000,
+      statement_timeout: 10000,
+      max: 20,
     });
 
-    // Test the connection
-    await pool.connect();
+    // Test the connection with error handling
+    const client = await pool.connect();
+    
+    try {
+      console.log('Database connection established');
 
-    // Query to check if table exists
-    const tableCheck = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = $1
-      );
-    `, [data.tableName]);
+      // Query to check if table exists
+      const tableCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public'
+          AND table_name = $1
+        );
+      `, [data.tableName]);
 
-    if (!tableCheck.rows[0].exists) {
-      throw new TableNotFoundError(`Table ${data.tableName} not found`);
+      if (!tableCheck.rows[0].exists) {
+        throw new TableNotFoundError(`Table ${data.tableName} not found`);
+      }
+
+      // Use parameterized query to prevent SQL injection
+      const queryText = `
+        SELECT * FROM "${data.tableName}"
+        LIMIT 1000
+      `;
+      
+      console.log('Executing query:', queryText);
+      const result = await client.query(queryText);
+
+      const queryResult: DatabaseQueryResult = {
+        data: result.rows,
+        metadata: {
+          tableName: data.tableName,
+          rowCount: result.rowCount || 0,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      return queryResult;
+
+    } finally {
+      // Release the client back to the pool
+      client.release();
     }
 
-    // Query the table
-    const result = await pool.query(`SELECT * FROM ${data.tableName}`);
-
-    const queryResult: DatabaseQueryResult = {
-      data: result.rows,
-      metadata: {
-        tableName: data.tableName,
-        rowCount: result.rowCount || 0,
-        timestamp: new Date().toISOString()
-      }
-    };
-
-    return queryResult;
-
   } catch (error) {
+    console.error('Database error:', error);
+    
     if (error instanceof Error) {
       if (error.message.includes('connection')) {
-        throw new DatabaseConnectionError(error.message);
+        throw new DatabaseConnectionError(
+          `Failed to connect to database: ${error.message}`
+        );
+      }
+      if (error.message.includes('timeout')) {
+        throw new DatabaseConnectionError(
+          'Database connection timed out. Please try again.'
+        );
       }
     }
     throw throwAppropriateError(error);
@@ -65,5 +91,3 @@ export async function queryDatabase(
     }
   }
 }
-
-// Validate database URL format

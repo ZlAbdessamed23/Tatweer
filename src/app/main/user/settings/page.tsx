@@ -49,18 +49,38 @@ export default function DepartmentImportPage() {
   }
 
   const handleConfirm = () => {
-    console.log(
-      "Launching import for department:",
-      selectedDepartment,
-      "with method:",
-      importMethod,
-      "file:",
-      file,
-      "database URL:",
-      databaseUrl,
-    )
-    closeModal()
-  }
+    // Display department ID and URL before proceeding
+    console.log("Department ID:", selectedDepartment?.departmentId);
+    console.log("Database URL:", databaseUrl);
+  
+    // Prepare the data object for the POST request
+    const requestData = {
+      databaseConnectionConnectionString: databaseUrl, // This maps to the backend's 'databaseConnectionConnectionString'
+      databaseConnectionDepartmentId: selectedDepartment?.departmentId, // This maps to the backend's 'databaseConnectionDepartmentId'
+    };
+  
+    // Proceed with the fetch
+    fetch("/api/main/externConnection/dataBaseUrl", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData), // Send the requestData as the JSON body
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to import data");
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Import successful:", data);
+        closeModal();
+      })
+      .catch((error) => {
+        console.error("Error during import:", error);
+      });
+  };
+  
+  
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()

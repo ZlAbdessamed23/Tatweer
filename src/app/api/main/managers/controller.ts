@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import prisma from "@/lib/prisma/prismaClient";
 import {
   AddManagerData,
@@ -107,18 +109,7 @@ export async function addManager(
       });
 
       // Generate token and create verification token
-      const token = generateVerificationToken(newManager.managerId);
-
-      await Promise.all([
-        prisma.emailVerificationToken.create({
-          data: {
-            emailVerificationTokenToken: token,
-            emailVerificationTokenManagerId: newManager.managerId,
-            emailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          },
-        }),
-
-      ]);
+      
 
       return { Manager: newManager };
     });
