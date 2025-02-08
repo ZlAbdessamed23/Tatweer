@@ -1,5 +1,5 @@
 "use client"
-
+import Image from "next/image";
 import Link from 'next/link'
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -102,7 +102,7 @@ export default function Sidebar() {
 
     return (
         <div className="bg-white">
-            <h1 className='text-center text-2xl  font-medium mt-4 mb-6 text-main-blue '>Orca Bitches</h1>
+          <Image src={'/logo.png'} height={100} width={120} alt={"logo"} />
             <div className='flex flex-col overflow-y-scroll  gap-4'>
                 {sidebarLinks.map((elem) => (
                     <SidebarItem key={elem.title} itemInfos={elem} path={path} />

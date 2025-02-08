@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import axios from 'axios';
 import { User } from '../api/auth/signin/types';
 import { DepartmentType } from '../types/constant';

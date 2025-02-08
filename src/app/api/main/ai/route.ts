@@ -1,26 +1,31 @@
+/* eslint-disable */
+
 import { DepartmentType } from '@/app/types/constant';
 import { GenerateRequest } from '@/app/types/types';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-    try {
-        const {
-            department,
-            companySize = 'medium',
-            industry = 'general',
-            currentChallenges = '',
-            budget = 'moderate',
-            timeframe = '12 months',
-            conversation
-        }: GenerateRequest = await req.json();
+  try {
+    const {
+      department,
+      companySize = 'medium',
+      industry = 'general',
+      currentChallenges = '',
+      budget = 'moderate',
+      timeframe = '12 months',
+      conversation = []  // default to empty array if not provided
+    }: GenerateRequest = await req.json();
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-        const updatedConversation = [...conversation, `User: Department: ${department}, Company Size: ${companySize}, Industry: ${industry}, Challenges: ${currentChallenges}, Budget: ${budget}, Timeframe: ${timeframe}`];
+    const updatedConversation = [
+      ...conversation,
+      `User: Department: ${department}, Company Size: ${companySize}, Industry: ${industry}, Challenges: ${currentChallenges}, Budget: ${budget}, Timeframe: ${timeframe}`
+    ];
 
-        const systemPrompt = `
+    const systemPrompt = `
     You are an expert business strategy consultant with extensive experience in organizational development and department optimization. Your role is to generate comprehensive, practical, and actionable strategies for improving specific business departments. Follow these guidelines:
 
     1. ANALYSIS FRAMEWORK
@@ -86,7 +91,7 @@ export async function POST(req: NextRequest) {
     - Bullet points for actionable items
     - Tables for comparative analysis
     - Numbered steps for implementation
-    - Bold important metrics and KPIs
+    - **Bold** important metrics and KPIs
     - Highlight critical success factors
 
     Remember: Your recommendations should be:
@@ -101,23 +106,23 @@ export async function POST(req: NextRequest) {
     - People-centric
     - Results-oriented`;
 
-        const result = await model.generateContent(
-            `${systemPrompt}\n${updatedConversation.join("\n")}`
-        );
+    const result = await model.generateContent(
+      `${systemPrompt}\n${updatedConversation.join("\n")}`
+    );
 
-        const aiResponse = result.response.text();
-        updatedConversation.push(`AI: ${aiResponse}`);
+    const aiResponse = result.response.text();
+    updatedConversation.push(`AI: ${aiResponse}`);
 
-        return NextResponse.json({
-            message: aiResponse,
-            conversation: updatedConversation 
-        });
+    return NextResponse.json({
+      message: aiResponse,
+      conversation: updatedConversation 
+    });
 
-    } catch (error) {
-        console.error('Error generating strategy:', error);
-        return NextResponse.json(
-            { error: 'Failed to generate business strategy' },
-            { status: 500 }
-        );
-    };
+  } catch (error) {
+    console.error('Error generating strategy:', error);
+    return NextResponse.json(
+      { error: 'Failed to generate business strategy' },
+      { status: 500 }
+    );
+  }
 };

@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   const data = {
     revenue: 1616271,
-    cardHolder: "Chamso Terma",
+    cardHolder: "Micro Club",
     expiration: new Date(),
     cardNumber: "17261261621",
   };
