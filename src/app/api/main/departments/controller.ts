@@ -9,7 +9,7 @@ import { throwAppropriateError } from "@/lib/error-handler/throwError";
 
 export async function addDepartment(
   data: AddDepartmentData,
-  companyId: string,
+  companyId: string
   
 ): Promise<DepartmentResult> {
   try {
@@ -69,11 +69,20 @@ export async function addDepartment(
               
             },
           },
+          departmentstartegies:{
+            create: {
+              strategieContent: "hello from chamso",
+              
+
+              
+            },
+          }
         },
         select: {
           departmentId: true,
           departmentName: true,
           departmentType: true,
+          
         },
       });
 

@@ -1,17 +1,8 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "DepartementType" AS ENUM ('sales', 'marketing', 'finance', 'humanResources', 'operations', 'engineering', 'product', 'design', 'customerSupport', 'dataScience', 'logistics', 'legal', 'it', 'other');
 
 -- CreateEnum
 CREATE TYPE "ColumnType" AS ENUM ('email', 'phoneNumber', 'string', 'number', 'url', 'date', 'time');
-
--- DropTable
-DROP TABLE "User";
 
 -- CreateTable
 CREATE TABLE "Admin" (
@@ -20,7 +11,7 @@ CREATE TABLE "Admin" (
     "adminLastName" TEXT NOT NULL,
     "adminEmail" TEXT NOT NULL,
     "adminPassword" TEXT NOT NULL,
-    "adminIsActivated" BOOLEAN NOT NULL DEFAULT false,
+    "adminIsActivated" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "Admin_pkey" PRIMARY KEY ("adminId")
 );
@@ -45,7 +36,7 @@ CREATE TABLE "Manager" (
     "managerLastName" TEXT NOT NULL,
     "managerEmail" TEXT NOT NULL,
     "managerPassword" TEXT NOT NULL,
-    "managerIsActivated" BOOLEAN NOT NULL DEFAULT false,
+    "managerIsActivated" BOOLEAN NOT NULL DEFAULT true,
     "managerCompanyId" TEXT NOT NULL,
 
     CONSTRAINT "Manager_pkey" PRIMARY KEY ("managerId")
@@ -116,35 +107,6 @@ CREATE TABLE "Table" (
 );
 
 -- CreateTable
-CREATE TABLE "Column" (
-    "columnId" TEXT NOT NULL,
-    "columnName" TEXT NOT NULL,
-    "columnType" "ColumnType" NOT NULL,
-    "columnTableId" TEXT NOT NULL,
-
-    CONSTRAINT "Column_pkey" PRIMARY KEY ("columnId")
-);
-
--- CreateTable
-CREATE TABLE "Row" (
-    "rowId" TEXT NOT NULL,
-    "rowTableId" TEXT NOT NULL,
-    "rowCreatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Row_pkey" PRIMARY KEY ("rowId")
-);
-
--- CreateTable
-CREATE TABLE "Cell" (
-    "cellId" TEXT NOT NULL,
-    "cellRowId" TEXT NOT NULL,
-    "cellColumnId" TEXT NOT NULL,
-    "cellValue" TEXT NOT NULL,
-
-    CONSTRAINT "Cell_pkey" PRIMARY KEY ("cellId")
-);
-
--- CreateTable
 CREATE TABLE "Task" (
     "taskId" TEXT NOT NULL,
     "taskTitle" TEXT NOT NULL,
@@ -161,7 +123,6 @@ CREATE TABLE "Task" (
 -- CreateTable
 CREATE TABLE "ThirdPartyIntegration" (
     "thirdPartyIntegrationId" TEXT NOT NULL,
-    "thirdPartyIntegrationType" TEXT NOT NULL,
     "thirdPartyIntegrationDepartmentId" TEXT NOT NULL,
     "thirdPartyIntegrationConnectionDetails" TEXT NOT NULL,
 
@@ -171,12 +132,57 @@ CREATE TABLE "ThirdPartyIntegration" (
 -- CreateTable
 CREATE TABLE "DatabaseConnection" (
     "databaseConnectionId" TEXT NOT NULL,
-    "databaseConnectionType" TEXT NOT NULL,
     "databaseConnectionDepartmentId" TEXT NOT NULL,
     "databaseConnectionConnectionString" TEXT NOT NULL,
-    "databaseConnectionCredentials" TEXT NOT NULL,
 
     CONSTRAINT "DatabaseConnection_pkey" PRIMARY KEY ("databaseConnectionId")
+);
+
+-- CreateTable
+CREATE TABLE "JsonUpload" (
+    "id" TEXT NOT NULL,
+    "json" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "jsonDepartmentId" TEXT NOT NULL,
+
+    CONSTRAINT "JsonUpload_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Trend" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "description" TEXT,
+    "score" INTEGER NOT NULL DEFAULT 0,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Trend_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Posts" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT,
+    "published" BOOLEAN NOT NULL DEFAULT false,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Posts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DepartmentStrategies" (
+    "departmentStrategieId" TEXT NOT NULL,
+    "strategieContent" TEXT,
+    "published" BOOLEAN NOT NULL DEFAULT false,
+    "startegieDepartmentId" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DepartmentStrategies_pkey" PRIMARY KEY ("departmentStrategieId")
 );
 
 -- CreateIndex
@@ -222,25 +228,13 @@ ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_subscriptionPlanId_fkey"
 ALTER TABLE "Department" ADD CONSTRAINT "Department_departmentCompanyId_fkey" FOREIGN KEY ("departmentCompanyId") REFERENCES "Company"("companyId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DepartmentManager" ADD CONSTRAINT "DepartmentManager_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("departmentId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "DepartmentManager" ADD CONSTRAINT "DepartmentManager_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("departmentId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DepartmentManager" ADD CONSTRAINT "DepartmentManager_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "Manager"("managerId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "DepartmentManager" ADD CONSTRAINT "DepartmentManager_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "Manager"("managerId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Table" ADD CONSTRAINT "Table_tableDepartmentId_fkey" FOREIGN KEY ("tableDepartmentId") REFERENCES "Department"("departmentId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Column" ADD CONSTRAINT "Column_columnTableId_fkey" FOREIGN KEY ("columnTableId") REFERENCES "Table"("tableId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Row" ADD CONSTRAINT "Row_rowTableId_fkey" FOREIGN KEY ("rowTableId") REFERENCES "Table"("tableId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Cell" ADD CONSTRAINT "Cell_cellRowId_fkey" FOREIGN KEY ("cellRowId") REFERENCES "Row"("rowId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Cell" ADD CONSTRAINT "Cell_cellColumnId_fkey" FOREIGN KEY ("cellColumnId") REFERENCES "Column"("columnId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Table" ADD CONSTRAINT "Table_tableDepartmentId_fkey" FOREIGN KEY ("tableDepartmentId") REFERENCES "Department"("departmentId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Task" ADD CONSTRAINT "Task_taskAdminId_fkey" FOREIGN KEY ("taskAdminId") REFERENCES "Admin"("adminId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -253,3 +247,9 @@ ALTER TABLE "ThirdPartyIntegration" ADD CONSTRAINT "ThirdPartyIntegration_thirdP
 
 -- AddForeignKey
 ALTER TABLE "DatabaseConnection" ADD CONSTRAINT "DatabaseConnection_databaseConnectionDepartmentId_fkey" FOREIGN KEY ("databaseConnectionDepartmentId") REFERENCES "Department"("departmentId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "JsonUpload" ADD CONSTRAINT "JsonUpload_jsonDepartmentId_fkey" FOREIGN KEY ("jsonDepartmentId") REFERENCES "Department"("departmentId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DepartmentStrategies" ADD CONSTRAINT "DepartmentStrategies_startegieDepartmentId_fkey" FOREIGN KEY ("startegieDepartmentId") REFERENCES "Department"("departmentId") ON DELETE RESTRICT ON UPDATE CASCADE;
