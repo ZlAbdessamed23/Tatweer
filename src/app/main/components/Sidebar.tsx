@@ -12,7 +12,7 @@ import {
     FaHandHoldingUsd,
     FaRegWindowRestore,
     FaCog,
-    FaTasks
+    FaShoppingCart
 } from "react-icons/fa"
 import { BsTools } from "react-icons/bs";
 import { usePathname } from 'next/navigation'
@@ -76,6 +76,12 @@ export default function Sidebar() {
             url: "/main/managers",
         },
         {
+            icon: FaShoppingCart,
+            title: "sales",
+            url: "/main/sales",
+        },
+        
+        {
             icon: FaChartPie,
             title: "Investments",
             url: "/investments",
@@ -93,12 +99,12 @@ export default function Sidebar() {
         {
             icon: FaRegWindowRestore,
             title: "Services",
-            url: "/services",
+            url: "/main/services",
         },
         {
             icon: FaChartPie,
             title: "Strategies",
-            url: "/strategies",
+            url: "/main/strategies",
         },
         {
             icon: FaCog,
@@ -111,8 +117,8 @@ export default function Sidebar() {
 
     return (
         <div className="bg-white">
-            <h1 className='text-center text-2xl font-medium mt-4 mb-6 text-main-blue '>Orca Bitches</h1>
-            <div className='flex flex-col gap-4'>
+            <h1 className='text-center text-2xl  font-medium mt-4 mb-6 text-main-blue '>Orca Bitches</h1>
+            <div className='flex flex-col overflow-y-scroll  gap-4'>
                 {sidebarLinks.map((elem) => (
                     <SidebarItem key={elem.title} itemInfos={elem} path={path} />
                 ))}

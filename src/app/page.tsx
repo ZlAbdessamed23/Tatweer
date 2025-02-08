@@ -18,7 +18,7 @@ export default async function Home() {
     },
     {
       title: "Premium",
-      price: 9.99,
+      price: 28.98,
       features: [
         "Full Access to Essential Features",
         "Priority Support",
