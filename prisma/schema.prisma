@@ -212,7 +212,7 @@ model Posts {
   date      DateTime @default(now())
 }
 model DepartmentStrategies {
-  departmentStrategieId        String      @id 
+  departmentStrategieId        String      @id @default(cuid()) 
   
   strategieContent   String?
   published Boolean  @default(false) 
