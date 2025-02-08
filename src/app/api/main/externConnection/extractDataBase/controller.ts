@@ -67,17 +67,3 @@ export async function queryDatabase(
 }
 
 // Validate database URL format
-function validateDatabaseUrl(url: string): boolean {
-  try {
-    const pattern = /^postgresql:\/\/[^:]+:[^@]+@[^:]+:\d+\/[^?]+$/;
-    return pattern.test(url);
-  } catch {
-    return false;
-  }
-}
-
-// Helper function to sanitize table name to prevent SQL injection
-function sanitizeTableName(tableName: string): string {
-  // Remove any characters that aren't alphanumeric or underscores
-  return tableName.replace(/[^a-zA-Z0-9_]/g, '');
-}
