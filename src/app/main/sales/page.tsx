@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -21,7 +23,6 @@ interface Product {
   name: string;
   price: number;
   change: number;
-  // These may or may not be returned from your API.
   bgColor?: string;
   iconColor?: string;
 }
@@ -35,8 +36,8 @@ interface LocationMarker {
   lng: number;
   lat: number;
   name: string;
-  sales : number;
-  growth : number;
+  sales: number;
+  growth: number;
 }
 
 // Helper function to normalize API responses into an array
@@ -50,14 +51,46 @@ function normalizeResponse<T>(response: unknown): T[] {
   return [];
 }
 
+// Transform database data into Product interface
+function transformDatabaseData(data: any[]): Product[] {
+  return data.map((item) => ({
+    name: item.product_name,
+    price: parseFloat(item.sales_amount),
+    change: item.growth_percentage ? parseFloat(item.growth_percentage) : 0,
+    bgColor: getProductBgColor(item.product_name),
+    iconColor: getProductIconColor(item.product_name)
+  }));
+}
+
+// Helper function to get background color based on product name
+function getProductBgColor(productName: string): string {
+  const colors = {
+    "iPhone 15 Pro": "bg-blue-50",
+    "MacBook Air M2": "bg-purple-50",
+    "Apple Watch Series 9": "bg-green-50",
+    "MacBook Pro 5": "bg-indigo-50"
+  };
+  return colors[productName as keyof typeof colors] || "bg-gray-50";
+}
+
+// Helper function to get icon color based on product name
+function getProductIconColor(productName: string): string {
+  const colors = {
+    "iPhone 15 Pro": "text-blue-500",
+    "MacBook Air M2": "text-purple-500",
+    "Apple Watch Series 9": "text-green-500",
+    "MacBook Pro 5": "text-indigo-500"
+  };
+  return colors[productName as keyof typeof colors] || "text-gray-500";
+}
+
 export default function SalesDashboard() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [productsData, setProductsData] = useState<Product[]>([]);
   const [locationMarkers, setLocationMarkers] = useState<LocationMarker[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  // Define a mapping from product names (or IDs) to icon components.
   const iconMapping: { [key: string]: React.ElementType } = {
     "iPhone 15 Pro": FaMobileAlt,
     "MacBook Air M2": FaLaptop,
@@ -68,19 +101,14 @@ export default function SalesDashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [productsResponse, salesPredictionResponse, wilayaSalesResponse] =
-          await Promise.all([
-            fetch("/api/sales/products").then((res) => res.json()),
-            fetch("/api/sales/sales-prediction").then((res) => res.json()),
-            fetch("/api/sales/wilaya-sales").then((res) => res.json()),
-          ]);
+        const [salesPredictionResponse, wilayaSalesResponse] = await Promise.all([
+          fetch("/api/sales/sales-prediction").then((res) => res.json()),
+          fetch("/api/sales/wilaya-sales").then((res) => res.json()),
+        ]);
 
-        // Normalize each response to ensure we have arrays
-        const products = normalizeResponse<Product>(productsResponse);
         const salesPrediction = normalizeResponse<SalesData>(salesPredictionResponse);
         const wilayaSales = normalizeResponse<LocationMarker>(wilayaSalesResponse);
 
-        setProductsData(products);
         setSalesData(salesPrediction);
         setLocationMarkers(wilayaSales);
       } catch (error) {
@@ -93,17 +121,48 @@ export default function SalesDashboard() {
   }, []);
 
   useEffect(() => {
+    const fetchDepartmentData = async () => {
+      try {
+        const response = await fetch("/api/main/departments/sales");
+        if (!response.ok) throw new Error("Failed to fetch department data");
+        
+        const data = await response.json();
+        const connectionString = data.Department.departmentConnections[0].databaseConnectionConnectionString;
+        const lastSlashIndex = connectionString.lastIndexOf("/");
+        const databaseUrl = connectionString.substring(0, lastSlashIndex);
+        const tableName = connectionString.substring(lastSlashIndex + 1);
+        
+        const dbResponse = await fetch("/api/main/externConnection/extractDataBase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ databaseUrl, tableName }),
+        });
+
+        if (!dbResponse.ok) throw new Error("Failed to fetch database data");
+        
+        const dbData = await dbResponse.json();
+        const transformedProducts = transformDatabaseData(dbData.data);
+        setProducts(transformedProducts);
+      } catch (error: any) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    fetchDepartmentData();
+  }, []);
+
+  useEffect(() => {
     if (!mapContainer.current) return;
   
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/navigation-day-v1",
       center: [4.16, 34.75],
-      zoom: 2, // Start with a low zoom level
+      zoom: 2,
     });
   
     map.on("load", () => {
-      map.flyTo({ zoom: 5.5, duration: 2000 }); // Animate zoom-in
+      map.flyTo({ zoom: 5.5, duration: 2000 });
     });
   
     locationMarkers.forEach(({ lng, lat, name, sales, growth }) => {
@@ -111,13 +170,10 @@ export default function SalesDashboard() {
       const latNum = typeof lat === "number" ? lat : parseFloat(lat);
   
       if (isNaN(lngNum) || isNaN(latNum)) {
-        console.error(
-          `Invalid coordinates for marker "${name}": lng=${lng}, lat=${lat}`
-        );
+        console.error(`Invalid coordinates for marker "${name}": lng=${lng}, lat=${lat}`);
         return;
       }
   
-      // Create a popup with more details
       const popupContent = `
         <div style="font-size: 14px; font-family: Arial, sans-serif;">
           <strong>${name}</strong><br/>
@@ -134,8 +190,6 @@ export default function SalesDashboard() {
   
     return () => map.remove();
   }, [locationMarkers]);
-  
-  
 
   return (
     <div className="w-full flex flex-col gap-8">
@@ -148,7 +202,6 @@ export default function SalesDashboard() {
       </motion.h1>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Sales Prediction Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -179,17 +232,14 @@ export default function SalesDashboard() {
           </div>
         </motion.div>
 
-        {/* Products Sales List */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white p-6 rounded-lg shadow-sm"
         >
           <h2 className="text-lg font-semibold mb-4">Products Sales</h2>
-          <div className="space-y-4 overflow-y-scroll">
-            {productsData.map((product, index) => {
-              // Use the icon mapping to get the corresponding icon component.
-              // If no mapping exists, fallback to FaLaptop.
+          <div className="space-y-4 overflow-y-auto max-h-[300px]">
+            {products.map((product, index) => {
               const IconComponent = iconMapping[product.name] || FaLaptop;
               return (
                 <motion.div
@@ -199,8 +249,8 @@ export default function SalesDashboard() {
                   transition={{ delay: 0.1 * (index + 1) }}
                   className="flex items-center gap-4"
                 >
-                  <div className={`p-2 rounded-lg ${product.bgColor || "bg-gray-50"}`}>
-                    <IconComponent className={`w-6 h-6 ${product.iconColor || "text-gray-500"}`} />
+                  <div className={`p-2 rounded-lg ${product.bgColor}`}>
+                    <IconComponent className={`w-6 h-6 ${product.iconColor}`} />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{product.name}</h3>
@@ -221,7 +271,6 @@ export default function SalesDashboard() {
         </motion.div>
       </div>
 
-      {/* Sales Locations Map */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

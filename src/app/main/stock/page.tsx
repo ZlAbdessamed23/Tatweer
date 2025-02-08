@@ -2,11 +2,10 @@
 
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import DynamicTable from "./component/DynamicTable"
 import { FaChevronDown } from 'react-icons/fa';
-
 
 interface ChartData {
   year: string
@@ -14,11 +13,26 @@ interface ChartData {
   value2: number
 }
 
-const stockData = [
-  { id: "01.", name: "Trivago", left: "520", need: "1000", number: "05123456789", status: "Absent" },
-  { id: "02.", name: "Canon", left: "480", need: "236", number: "05123456789", status: "working" },
-  { id: "03.", name: "Uber Food", left: "350", need: "475", number: "05123456789", status: "Absent" },
-]
+interface StockData {
+  id: string
+  name: string
+  left: string
+  need: string
+  number: string
+  status: string
+}
+
+// Transform the API data into the required format
+const transformStockData = (apiData: any[]): StockData[] => {
+  return apiData.map(stock => ({
+    id: stock.stock_id.toString() + ".",
+    name: stock.ticker,
+    left: stock.open_price,
+    need: stock.close_price,
+    number: stock.volume,
+    status: parseFloat(stock.close_price) > parseFloat(stock.open_price) ? "working" : "Absent"
+  }))
+}
 
 const employeeData = [
   {
@@ -45,22 +59,78 @@ const chartData: ChartData[] = [
   { year: "2018", value1: 15000, value2: 30000 },
 ]
 
-// Function to generate config dynamically
 const generateConfig = <T extends Record<string, any>>(data: T[]): Array<keyof T> => {
   return data.length > 0 ? (Object.keys(data[0]) as Array<keyof T>) : []
 }
 
 export default function StockDashboard() {
-  const [stockConfig, setStockConfig] = useState<(keyof (typeof stockData)[0])[]>(generateConfig(stockData))
+  const [SupaUrl, setSupaUrl] = useState('');
+  const [tableName, setTableName] = useState('');
+  const [dataFromDatabase, setDataFromDatabase] = useState<any[]>([]);
+  const [stockData, setStockData] = useState<StockData[]>([]);
+  
+  const [stockConfig, setStockConfig] = useState<(keyof StockData)[]>([])
   const [employeeConfig, setEmployeeConfig] = useState<(keyof (typeof employeeData)[0])[]>(generateConfig(employeeData))
   const [stockDropdownOpen, setStockDropdownOpen] = useState(false)
   const [employeeDropdownOpen, setEmployeeDropdownOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchDepartmentData = async () => {
+      try {
+        const response = await fetch("/api/main/departments/marketing");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch department data");
+        }
+
+        const data = await response.json();
+        const connectionString = data.Department.departmentConnections[0].databaseConnectionConnectionString;
+        const lastSlashIndex = connectionString.lastIndexOf("/");
+        const databaseUrl = connectionString.substring(0, lastSlashIndex);
+        const extractedTableName = connectionString.substring(lastSlashIndex + 1);
+
+        setSupaUrl(databaseUrl);
+        setTableName(extractedTableName);
+
+        await fetchDatabaseData(databaseUrl, extractedTableName);
+      } catch (error: any) {
+        console.error("Error fetching department data:", error.message);
+      }
+    };
+
+    const fetchDatabaseData = async (databaseUrl: string, tableName: string) => {
+      try {
+        const requestData = { databaseUrl, tableName };
+        const response = await fetch("/api/main/externConnection/extractDataBase", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data from the database");
+        }
+
+        const data = await response.json();
+        setDataFromDatabase(data.data);
+        const transformedData = transformStockData(data.data);
+        setStockData(transformedData);
+        setStockConfig(generateConfig(transformedData));
+      } catch (error: any) {
+        console.error("Error fetching data from database:", error.message);
+      }
+    };
+
+    fetchDepartmentData();
+  }, []);
 
   const stockFormatters = {
     number: (value: string) => <span className="font-mono">{value}</span>,
   }
 
-  const handleStockConfigChange = (column: keyof (typeof stockData)[0]) => {
+  const handleStockConfigChange = (column: keyof StockData) => {
     setStockConfig((prevConfig) =>
       prevConfig.includes(column) ? prevConfig.filter((item) => item !== column) : [...prevConfig, column],
     )
