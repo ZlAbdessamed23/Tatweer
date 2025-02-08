@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { User } from '../api/auth/signin/types';
 import { DepartmentType } from '../types/constant';
+import { GenerateRequest } from '../types/types';
 
 type SignupRequest = {
     adminInfo: {
@@ -42,6 +43,21 @@ interface Task {
     taskDueDate: Date;
     taskStatus: string;
     taskManager: string;
+}
+
+interface GeminiRequest {
+    department: DepartmentType;
+    companySize?: string;
+    industry?: string;
+    currentChallenges?: string;
+    budget?: string;
+    timeframe?: string;
+    conversation: string[];
+}
+
+interface GeminiResponse {
+    text: string;
+    conversation: string[];
 }
 
 
@@ -149,7 +165,7 @@ export const addDepartment = async (department: Omit<Department, 'departmentId'>
             throw new Error(error.response?.data?.message || 'Failed to add department');
         }
         throw new Error('An unexpected error occurred');
-    }
+    };
 };
 
 export const updateDepartment = async (department: Department): Promise<string> => {
@@ -161,7 +177,7 @@ export const updateDepartment = async (department: Department): Promise<string> 
             throw new Error(error.response?.data?.message || 'Failed to update department');
         }
         throw new Error('An unexpected error occurred');
-    }
+    };
 };
 
 export const deleteDepartment = async (departmentId: string): Promise<string> => {
@@ -173,7 +189,7 @@ export const deleteDepartment = async (departmentId: string): Promise<string> =>
             throw new Error(error.response?.data?.message || 'Failed to delete department');
         }
         throw new Error('An unexpected error occurred');
-    }
+    };
 };
 
 export const getDepartments = async (): Promise<{ Departments: Array<Department> }> => {
@@ -194,12 +210,11 @@ export const getDepartments = async (): Promise<{ Departments: Array<Department>
         return data; // Assuming the API returns { departments: Array<Department> }
     } catch (error) {
         throw new Error(error instanceof Error ? error.message : 'An unexpected error occurred');
-    }
+    };
 };
 
 
 export const addTask = async (task: Omit<Task, 'taskId'>): Promise<string> => {
-    console.log(task)
     try {
         const response = await axios.post(`${API_BASE_URL}/main/tasks`, task);
         return response.data.message || 'Task added successfully!';
@@ -208,7 +223,7 @@ export const addTask = async (task: Omit<Task, 'taskId'>): Promise<string> => {
             throw new Error(error.response?.data?.message || 'Failed to add task');
         }
         throw new Error('An unexpected error occurred');
-    }
+    };
 };
 
 export const updateTask = async (task: Task): Promise<string> => {
@@ -220,7 +235,7 @@ export const updateTask = async (task: Task): Promise<string> => {
             throw new Error(error.response?.data?.message || 'Failed to update task');
         }
         throw new Error('An unexpected error occurred');
-    }
+    };
 };
 
 export const deleteTask = async (taskId: string): Promise<string> => {
@@ -232,7 +247,7 @@ export const deleteTask = async (taskId: string): Promise<string> => {
             throw new Error(error.response?.data?.message || 'Failed to delete task');
         }
         throw new Error('An unexpected error occurred');
-    }
+    };
 };
 
 export const getTasks = async (): Promise<{ Tasks: Array<Task> }> => {
@@ -252,5 +267,20 @@ export const getTasks = async (): Promise<{ Tasks: Array<Task> }> => {
         return data; // Assuming the API returns { Tasks: Array<Task> }
     } catch (error) {
         throw new Error(error instanceof Error ? error.message : 'An unexpected error occurred');
-    }
+    };
+};
+
+
+
+
+export const generateDepartmentStrategy = async (params: GenerateRequest): Promise<GeminiResponse> => {
+    try {
+        const response = await axios.post<GeminiResponse>(`${API_BASE_URL}/main/ai`, params);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.error || 'Failed to generate strategy');
+        }
+        throw new Error('An unexpected error occurred while generating strategy');
+    };
 };
