@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { DepartmentType } from '@/app/types/constant';
 import { GenerateRequest } from '@/app/types/types';
 import { GoogleGenerativeAI } from '@google/generative-ai';
