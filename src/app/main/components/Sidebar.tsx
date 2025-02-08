@@ -12,11 +12,13 @@ import {
     FaHandHoldingUsd,
     FaRegWindowRestore,
     FaCog,
-    FaTasks,
-    FaShoppingCart
+    FaShoppingCart,
+    FaTasks
 } from "react-icons/fa"
 import { BsTools } from "react-icons/bs";
 import { usePathname } from 'next/navigation'
+import { RiLineChartLine } from "react-icons/ri";
+
 
 interface SidebarItemType {
     icon: React.ComponentType<{ className?: string }>;
@@ -48,8 +50,6 @@ function SidebarItem({ itemInfos, path }: { itemInfos: SidebarItemType, path: st
 
 export default function Sidebar() {
     const path = usePathname()
-    const [isOpen, setIsOpen] = React.useState(false)
-
     const sidebarLinks: Array<SidebarItemType> = [
         {
             icon: FaHome,
@@ -67,11 +67,6 @@ export default function Sidebar() {
             url: "/main/tasks",
         },
         {
-            icon: FaChartLine,
-            title: "Financial",
-            url: "/financial",
-        },
-        {
             icon: FaUserTie,
             title: "Managers",
             url: "/main/managers",
@@ -81,40 +76,22 @@ export default function Sidebar() {
             title: "sales",
             url: "/main/sales",
         },
-        
-        {
-            icon: FaChartPie,
-            title: "Investments",
-            url: "/investments",
-        },
-        {
-            icon: FaCreditCard,
-            title: "Credit Cards",
-            url: "/credit-cards",
-        },
-        {
-            icon: FaHandHoldingUsd,
-            title: "Loans",
-            url: "/loans",
-        },
-        {
-            icon: FaRegWindowRestore,
-            title: "Services",
-            url: "/main/services",
-        },
         {
             icon: FaChartPie,
             title: "Strategies",
             url: "/main/strategies",
         },
         {
+            icon: RiLineChartLine,
+            title: "Trends",
+            url: "/main/trends",
+        },
+        {
             icon: FaCog,
             title: "Settings",
-            url: "/settings",
+            url: "/main/user/profile",
         }
-    ]
-
-    const toggleSidebar = () => setIsOpen(!isOpen)
+    ];
 
     return (
         <div className="bg-white">
@@ -124,7 +101,6 @@ export default function Sidebar() {
                     <SidebarItem key={elem.title} itemInfos={elem} path={path} />
                 ))}
             </div>
-
         </div>
     )
-}
+};

@@ -163,4 +163,12 @@ export interface DatabaseConnection {
   databaseConnectionConnectionString: string;
   databaseConnectionCredentials: string;
   connectionDepartment: Department;
-}
+};
+
+interface BankCard {
+  cardId: string;
+  cardType: string;
+  cardHolderName: string;
+  cardNumber: string;
+  cardExpirationDate: string;
+};
