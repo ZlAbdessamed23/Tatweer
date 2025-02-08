@@ -17,6 +17,8 @@ import {
 } from "react-icons/fa"
 import { BsTools } from "react-icons/bs";
 import { usePathname } from 'next/navigation'
+import { RiLineChartLine } from "react-icons/ri";
+
 
 interface SidebarItemType {
     icon: React.ComponentType<{ className?: string }>;
@@ -78,6 +80,11 @@ export default function Sidebar() {
             icon: FaChartPie,
             title: "Strategies",
             url: "/main/strategies",
+        },
+        {
+            icon: RiLineChartLine,
+            title: "Trends",
+            url: "/main/trends",
         },
         {
             icon: FaCog,

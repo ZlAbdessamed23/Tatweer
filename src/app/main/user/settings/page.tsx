@@ -25,8 +25,7 @@ const Settings = () => {
 
     const onSubmit: SubmitHandler<IFormInputs> = (data) => {
         console.log(data);
-        // Handle form submission here
-        reset(); // Reset form after submission
+        reset();
     };
 
     const handleAddUrl = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -48,7 +47,7 @@ const Settings = () => {
                         <input
                             id="department"
                             type="text"
-                            {...register("department", { 
+                            {...register("department", {
                                 required: "Department is required",
                                 minLength: {
                                     value: 2,
@@ -68,7 +67,7 @@ const Settings = () => {
                             <input
                                 id="url"
                                 type="text"
-                                {...register("url", { 
+                                {...register("url", {
                                     required: "URL is required",
                                     pattern: {
                                         value: /^(http|https):\/\/[^ "]+$/,
