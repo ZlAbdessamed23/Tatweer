@@ -12,6 +12,7 @@ import {
     FaHandHoldingUsd,
     FaRegWindowRestore,
     FaCog,
+    FaTasks,
     FaShoppingCart
 } from "react-icons/fa"
 import { BsTools } from "react-icons/bs";
