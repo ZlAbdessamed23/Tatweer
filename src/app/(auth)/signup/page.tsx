@@ -1,43 +1,23 @@
-// components/Signup.tsx
-
 "use client";
 
 import React, { useState } from "react";
 import { IconType } from "react-icons";
-import { MdEmail, MdLock } from "react-icons/md";
+import { MdEmail, MdLock, MdBusiness, MdLocationOn, MdPeople, MdPhone } from "react-icons/md";
 import { IoPersonSharp } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 
-// -------------------------
-// InputField Component
-// -------------------------
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   placeholder: string;
   Icon?: IconType;
-  error?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
   type = "text",
   placeholder,
   Icon,
-  error,
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [hasContent, setHasContent] = useState(false);
-  const showLabel = isFocused || hasContent;
-
-  // Update local state and propagate changes to parent.
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHasContent(e.target.value !== "");
-    if (rest.onChange) {
-      rest.onChange(e);
-    }
-  };
-
-
-
 
   return (
     <div className="relative w-full mt-4">
@@ -47,7 +27,7 @@ const InputField: React.FC<InputFieldProps> = ({
             initial={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-2 left-0"
+            className="absolute bottom-3 left-0"
           >
             <Icon className="text-black text-xl" />
           </motion.div>
@@ -57,59 +37,49 @@ const InputField: React.FC<InputFieldProps> = ({
       <motion.span
         initial={{ y: 0, x: 32 }}
         animate={{
-          y: showLabel ? -28 : 0,
-          x: showLabel ? 0 : 32,
-          scale: showLabel ? 0.8 : 1,
+          y: isFocused ? -28 : 0,
+          x: isFocused ? 0 : 32,
+          scale: isFocused ? 0.8 : 1,
         }}
         transition={{ duration: 0.2 }}
         className={`absolute left-0 px-1 bg-white pointer-events-none ${
-          showLabel ? "text-purple-600" : "text-gray-500"
+          isFocused ? "text-purple-600" : "text-gray-500"
         }`}
       >
         {placeholder}
       </motion.span>
 
       <motion.input
-  type={type}
-  name={rest.name}
-  value={rest.value}
-  onChange={handleChange}
-  onFocus={(e) => {
-    setIsFocused(true);
-    if (rest.onFocus) rest.onFocus(e);
-  }}
-  onBlur={(e) => {
-    setIsFocused(false);
-    if (rest.onBlur) rest.onBlur(e);
-  }}
-  animate={{ paddingLeft: isFocused ? "0px" : "32px" }}
-  transition={{ duration: 0.2 }}
-  className="w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md"
-/>
-
-
-      {error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
+        type={type}
+        name={rest.name}
+        value={rest.value}
+        onChange={rest.onChange}
+        onFocus={(e) => {
+          setIsFocused(true);
+          if (rest.onFocus) rest.onFocus(e);
+        }}
+        onBlur={(e) => {
+          setIsFocused(false);
+          if (rest.onBlur) rest.onBlur(e);
+        }}
+        animate={{ paddingLeft: isFocused ? "0px" : "32px" }}
+        transition={{ duration: 0.2 }}
+        className="w-full pr-4 py-2 focus:outline-none border-transparent border-b-2 border-b-black focus:border-2 focus:border-purple-600 focus:rounded-md"
+      />
     </div>
   );
 };
 
-// -------------------------
-// Signup Component
-// -------------------------
 const Signup = () => {
   const [step, setStep] = useState(1);
-
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Form data state (ensure these keys match what your API expects)
   const [formData, setFormData] = useState({
-    // Personal Information
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    // Administrator/Company Information
     companyName: "",
     companyLocation: "",
     employerNumber: "",
@@ -117,16 +87,21 @@ const Signup = () => {
     companyPhoneNumber: "",
   });
 
-  // Generic change handler for inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
-  // Validate personal information (step 1)
   const validateStep1 = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
@@ -143,7 +118,6 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Validate company/administrator information (step 2)
   const validateStep2 = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!formData.companyName.trim()) newErrors.companyName = "Company Name is required";
@@ -156,7 +130,6 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Advance from step 1 to step 2
   const handleNext = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateStep1()) {
@@ -169,8 +142,7 @@ const Signup = () => {
     e.preventDefault();
     if (validateStep2()) {
       setErrors({});
-      
-      // Transform formData to match backend expectations
+
       const transformedData = {
         adminFirstName: formData.firstName,
         adminLastName: formData.lastName,
@@ -179,23 +151,20 @@ const Signup = () => {
         adminPhoneNumber: formData.companyPhoneNumber,
         companyName: formData.companyName,
         companyLocation: formData.companyLocation,
-        companyEmployeeNumber: parseInt(formData.employerNumber, 10), // Convert to integer
+        companyEmployeeNumber: parseInt(formData.employerNumber, 10),
         companyEmail: formData.companyGmail,
         companyPhoneNumber: formData.companyPhoneNumber,
         planName: "Free"
       };
-  
-      // Validate that employerNumber was successfully converted to an integer
+
       if (isNaN(transformedData.companyEmployeeNumber)) {
         setErrors((prev) => ({
           ...prev,
-          employerNumber: "Le nombre d'employés doit être un nombre valide"
+          employerNumber: "Employee number must be a valid number"
         }));
         return;
       }
-  
-      console.log("Data to be sent:", transformedData);
-  
+
       try {
         const response = await fetch("/api/auth/signup", {
           method: "POST",
@@ -204,24 +173,24 @@ const Signup = () => {
           },
           body: JSON.stringify(transformedData),
         });
-  
+
         const data = await response.json();
-  
+
         if (!response.ok) {
           setErrors((prev) => ({
             ...prev,
-            submit: data.message || "Une erreur s'est produite lors de l'inscription"
+            submit: data.message || "An error occurred during registration"
           }));
           return;
         }
-  
+
         console.log("Data submitted successfully:", data);
-      
+
       } catch (error) {
         console.error("Error submitting data:", error);
         setErrors((prev) => ({
           ...prev,
-          submit: "Une erreur de connexion s'est produite. Veuillez réessayer."
+          submit: "A connection error occurred. Please try again."
         }));
       }
     }
@@ -242,7 +211,6 @@ const Signup = () => {
               Icon={IoPersonSharp}
               value={formData.firstName}
               onChange={handleChange}
-              error={errors.firstName}
             />
             <InputField
               type="text"
@@ -251,7 +219,6 @@ const Signup = () => {
               Icon={IoPersonSharp}
               value={formData.lastName}
               onChange={handleChange}
-              error={errors.lastName}
             />
             <InputField
               type="email"
@@ -260,7 +227,6 @@ const Signup = () => {
               Icon={MdEmail}
               value={formData.email}
               onChange={handleChange}
-              error={errors.email}
             />
             <InputField
               type="password"
@@ -269,7 +235,6 @@ const Signup = () => {
               Icon={MdLock}
               value={formData.password}
               onChange={handleChange}
-              error={errors.password}
             />
             <InputField
               type="password"
@@ -278,7 +243,6 @@ const Signup = () => {
               Icon={MdLock}
               value={formData.confirmPassword}
               onChange={handleChange}
-              error={errors.confirmPassword}
             />
             <button
               type="submit"
@@ -298,45 +262,45 @@ const Signup = () => {
               type="text"
               name="companyName"
               placeholder="Company Name"
+              Icon={MdBusiness}
               value={formData.companyName}
               onChange={handleChange}
-              error={errors.companyName}
             />
             <InputField
               type="text"
               name="companyLocation"
               placeholder="Company Location"
+              Icon={MdLocationOn}
               value={formData.companyLocation}
               onChange={handleChange}
-              error={errors.companyLocation}
             />
             <InputField
               type="text"
               name="employerNumber"
               placeholder="Employer Number"
+              Icon={MdPeople}
               value={formData.employerNumber}
               onChange={handleChange}
-              error={errors.employerNumber}
             />
             <InputField
               type="email"
               name="companyGmail"
               placeholder="Company Gmail"
+              Icon={MdEmail}
               value={formData.companyGmail}
               onChange={handleChange}
-              error={errors.companyGmail}
             />
             <InputField
               type="tel"
               name="companyPhoneNumber"
               placeholder="Company Phone Number"
+              Icon={MdPhone}
               value={formData.companyPhoneNumber}
               onChange={handleChange}
-              error={errors.companyPhoneNumber}
             />
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors duration-200 mt-6"
+              className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 transition-colors duration-200 mt-6"
             >
               Submit
             </button>

@@ -31,7 +31,7 @@ const PredictedCreditCard = ({ props }: { props: PredictedCreditCardProps }) => 
     return (
         <div className='w-96 rounded-xl overflow-hidden border border-[#DFEAF2] shadow-md'>
             <div
-                className='p-6 bg-white'
+                className='p-6 bg-slate-50'
             >
                 <div className='flex items-center justify-between py-2'>
                     <span>

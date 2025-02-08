@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma/prismaClient";
 import {
-    AddManagerData,
+  AddManagerData,
   Manager,
   Managers,
 
@@ -109,7 +109,7 @@ export async function addManager(
 
       // Generate token and create verification token
       const token = generateVerificationToken(newManager.managerId);
-      
+
       await Promise.all([
         prisma.emailVerificationToken.create({
           data: {
@@ -118,32 +118,17 @@ export async function addManager(
             emailVerificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
           },
         }),
-        sendVerificationEmail(newManager.managerEmail, token)
+
       ]);
 
-      return {Manager: newManager};
+      return { Manager: newManager };
     });
   } catch (error) {
     throwAppropriateError(error);
-    throw error;
   }
 }
 
-async function sendVerificationEmail(
-  email: string,
-  token: string,
-  
-): Promise<void> {
-  const verificationLink = `${process.env.BASE_URL}/${token}`;
-  await sendMail(
-    email,
-    "Verify Your Email",
-    `Please verify your email by clicking on this link: ${verificationLink}`,
-    `<!DOCTYPE html>
-    <!-- Your existing HTML template -->
-    </html>`
-  );
-}
+
 
 export async function getAllManagers(companyId: string): Promise<Managers> {
   try {
@@ -176,7 +161,7 @@ export async function getAllManagers(companyId: string): Promise<Managers> {
 
 // Update the types to match your schema
 export function checkAdminRole(role: string) {
-    if (role !== "admin") {
-      throw new ForbiddenError("Only the Administrator can perform this action");
-    }
+  if (role !== "admin") {
+    throw new ForbiddenError("Only the Administrator can perform this action");
   }
+}
