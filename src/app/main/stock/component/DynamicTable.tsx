@@ -8,9 +8,9 @@ const DEFAULT_STATUS_COLORS = {
   negative: ['absent', 'inactive', 'unavailable', 'pending', 'rejected']
 };
 
-function DynamicTable<T extends BaseRecord>({ 
-  data, 
-  config, 
+function DynamicTable<T extends BaseRecord>({
+  data,
+  config,
   title,
   statusColors = DEFAULT_STATUS_COLORS,
   customFormatters
@@ -31,18 +31,17 @@ function DynamicTable<T extends BaseRecord>({
 
     // Handle status-like fields
     if (
-      typeof value === 'string' && 
+      typeof value === 'string' &&
       (String(header).toLowerCase().includes('status') || String(header).toLowerCase().includes('state'))
     ) {
       const isPositive = statusColors.positive.includes(value.toLowerCase());
       const isNegative = statusColors.negative.includes(value.toLowerCase());
-      
+
       if (isPositive || isNegative) {
         return (
           <span
-            className={`px-2 py-1 rounded text-xs font-medium ${
-              isPositive ? 'bg-pink-100 text-pink-600' : 'bg-red-100 text-red-600'
-            }`}
+            className={`px-2 py-1 rounded text-xs font-medium ${isPositive ? 'bg-pink-100 text-pink-600' : 'bg-red-100 text-red-600'
+              }`}
           >
             {value}
           </span>
@@ -67,7 +66,7 @@ function DynamicTable<T extends BaseRecord>({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      {title && <h2 className="text-xl font-semibold text-gray-900 mb-4">{title}</h2>}
+      {title && <h2 className="text-xl font-semibold text-main-blue mb-4">{title}</h2>}
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>

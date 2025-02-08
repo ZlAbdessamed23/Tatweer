@@ -15,7 +15,7 @@ import {
 import { BsTools } from "react-icons/bs";
 import { usePathname } from 'next/navigation'
 import { RiLineChartLine } from "react-icons/ri";
-
+import { LuChartNoAxesCombined } from "react-icons/lu";
 
 interface SidebarItemType {
     icon: React.ComponentType<{ className?: string }>;
@@ -73,7 +73,11 @@ export default function Sidebar() {
             title: "stock",
             url: "/main/stock",
         },
-        
+        {
+            icon: LuChartNoAxesCombined,
+            title: "logistics",
+            url: "/main/logistics",
+        },
         {
             icon: FaShoppingCart,
             title: "sales",
