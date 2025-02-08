@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  AddColumn,
-  
-  
-} from "@/app/api/main/tables/columns/controller";
-import { AddColumnData, requiredColumnFields } from "@/app/api/main/tables/columns/types";
+import {addDatabaseConnection } from "@/app/api/main/externConnection/dataBaseUrl/controller";
+import { AddDatabaseConnectionData, requiredDatabaseConnectionFields } from "@/app/api/main/externConnection/dataBaseUrl/types";
 import { handleError } from "@/lib/error-handler/handleError";
 import { getUser } from "@/lib/token/getUserFromToken";
 
@@ -16,9 +12,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorise" }, { status: 401 });
     }
     
- 
-    const data: AddColumnData = await request.json();
-    const missingFields = requiredColumnFields.filter(
+
+    const data: AddDatabaseConnectionData = await request.json();
+    const missingFields = requiredDatabaseConnectionFields.filter(
           (field) => !data[field]
         );
     
@@ -30,13 +26,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             { status: 400 }
           );
         }
-
-    await AddColumn(data);
+     await addDatabaseConnection(
+      data,
+      
+      
+    );
 
     return NextResponse.json(
-      {
-        message: "Column has been created successfully",
-      },
+      { message: "JsonUpload created successfully" },
       { status: 201 }
     );
   } catch (error) {

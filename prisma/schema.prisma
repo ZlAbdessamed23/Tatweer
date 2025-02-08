@@ -122,6 +122,8 @@ model Department {
   departmentTables         Table[]                 @relation("DepartmentToTables")
   departmentIntegrations   ThirdPartyIntegration[] @relation("DepartmentToIntegrations")
   departmentConnections    DatabaseConnection[]    @relation("DepartmentToConnections")
+  departmentJsons          JsonUpload[]            @relation("DepartmentJsons")
+  departmentstartegies     DepartmentStrategies[]  @relation("Departmentstartegies")
 }
 
 model DepartmentManager {
@@ -142,38 +144,11 @@ model Table {
   tableUpdatedAt    DateTime  @updatedAt
   
   tableDepartment   Department @relation("DepartmentToTables", fields: [tableDepartmentId], references: [departmentId],onDelete: Cascade)
-  tableColumns      Column[]   @relation("TableToColumns")
-  tableRows         Row[]      @relation("TableToRows")
+ 
 }
 
-model Column {
-  columnId        String  @id @default(cuid())
-  columnName      String
-  columnType      ColumnType
-  columnTableId   String
-  
-  columnTable     Table   @relation("TableToColumns", fields: [columnTableId], references: [tableId])
-  columnCells     Cell[]  @relation("ColumnToCells")
-}
 
-model Row {
-  rowId          String   @id @default(cuid())
-  rowTableId     String
-  rowCreatedAt   DateTime @default(now())
-  
-  rowTable       Table    @relation("TableToRows", fields: [rowTableId], references: [tableId])
-  rowCells       Cell[]   @relation("RowToCells")
-}
 
-model Cell {
-  cellId          String  @id @default(cuid())
-  cellRowId       String
-  cellColumnId    String
-  cellValue       String
-  
-  cellRow         Row     @relation("RowToCells", fields: [cellRowId], references: [rowId])
-  cellColumn      Column  @relation("ColumnToCells", fields: [cellColumnId], references: [columnId])
-}
 
 model Task {
   taskId           String   @id @default(cuid())
@@ -191,7 +166,7 @@ model Task {
 
 model ThirdPartyIntegration {
   thirdPartyIntegrationId              String     @id @default(cuid())
-  thirdPartyIntegrationType            String
+  
   thirdPartyIntegrationDepartmentId    String
   thirdPartyIntegrationConnectionDetails String
   
@@ -200,10 +175,49 @@ model ThirdPartyIntegration {
 
 model DatabaseConnection {
   databaseConnectionId              String     @id @default(cuid())
-  databaseConnectionType            String
+
   databaseConnectionDepartmentId    String
   databaseConnectionConnectionString String
-  databaseConnectionCredentials     String
+
   
   connectionDepartment             Department @relation("DepartmentToConnections", fields: [databaseConnectionDepartmentId], references: [departmentId])
+}
+model JsonUpload {
+  id        String @id @default(cuid())
+  json      Json
+  createdAt DateTime @default(now())
+  jsonDepartmentId    String
+  jsonDepartment             Department @relation("DepartmentJsons", fields: [jsonDepartmentId], references: [departmentId])
+
+
+}
+
+model Trend {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String
+  description String?
+  score       Int      @default(0)
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model Posts {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false) 
+  date      DateTime @default(now())
+}
+model DepartmentStrategies {
+  departmentStrategieId        String      @id 
+  
+  strategieContent   String?
+  published Boolean  @default(false) 
+  startegieDepartmentId    String
+  startegieDepartment             Department @relation("Departmentstartegies", fields: [startegieDepartmentId], references: [departmentId])
+  date      DateTime @default(now())
+  createdAt      DateTime @default(now())
 }

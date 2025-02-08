@@ -13,5 +13,7 @@ export type DepartmentResult = {
     departmentId: true;
     departmentName: true;
     departmentType: true;
+    departmentJsons: {select:{json:true}};
+    departmentConnections: {select:{databaseConnectionConnectionString:true}};
   }}> | null;
 };

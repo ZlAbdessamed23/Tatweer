@@ -3,7 +3,7 @@ import { AdminSignupData, requiredFields } from "./types";
 import { handleError } from "@/lib/error-handler/handleError";
 import {
   createAdmin,
-  sendVerificationEmail,
+  
 } from "@/app/api/auth/signup/controller";
 
 

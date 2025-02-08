@@ -6,7 +6,7 @@ export type AddColumnData = {
   columnTableId: string;
 };
 
-export const requiredcolumnFields: (keyof AddColumnData)[] = [
+export const requiredColumnFields: (keyof AddColumnData)[] = [
     "columnName",
     "columnType",
   "columnTableId",

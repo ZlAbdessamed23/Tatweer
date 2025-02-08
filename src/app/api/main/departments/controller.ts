@@ -69,11 +69,16 @@ export async function addDepartment(
               
             },
           },
+          departmentstartegies:{
+            create:{
+              strategieContent: `${data.departmentName} Strategy`,}
+          }
         },
         select: {
           departmentId: true,
           departmentName: true,
           departmentType: true,
+          
         },
       });
 

@@ -42,11 +42,13 @@ export async function updateDepartment(
         const updatedDepartment = await prisma.department.update({
           where: { departmentId },
           data: updateData,
-          select: {
+          select:{
             departmentId: true,
             departmentName: true,
             departmentType: true,
-          },
+            departmentJsons: true,
+            departmentConnections: {select:{databaseConnectionConnectionString:true}},
+          }
         });
 
         return { Department: updatedDepartment };
@@ -54,11 +56,13 @@ export async function updateDepartment(
 
       const existingDepartment = await prisma.department.findUnique({
         where: { departmentId },
-        select: {
+        select:{
           departmentId: true,
           departmentName: true,
           departmentType: true,
-        },
+          departmentJsons: true,
+          departmentConnections: {select:{databaseConnectionConnectionString:true}},
+        }
       });
 
       return { Department: existingDepartment };
@@ -74,23 +78,30 @@ export async function getDepartmentById(
   managerId: string
 ): Promise<DepartmentResult> {
   try {
+    // Get department with only needed fields + security check fields
     const existingDepartment = await prisma.department.findUnique({
       where: { departmentId },
-      include: {
-        parentCompany: true,
-        departmentManagers: {
-          include: {
-            departmentManager: true,
-          },
+      select: {
+        departmentId: true,
+        departmentName: true,
+        departmentType: true,
+        departmentJsons: { select: { json: true } },
+        departmentConnections: { 
+          select: { databaseConnectionConnectionString: true } 
         },
-      },
+        departmentCompanyId: true, // For company check
+        departmentManagers: {      // For access validation
+          select: { managerId: true }
+        }
+      }
     });
 
+    // Department existence and company validation
     if (!existingDepartment || existingDepartment.departmentCompanyId !== companyId) {
       throw new NotFoundError(`Département non trouvé`);
     }
 
-    // Check if the requesting manager has access to this department
+    // Access validation
     const hasAccess = existingDepartment.departmentManagers.some(
       (access) => access.managerId === managerId
     );
@@ -101,18 +112,16 @@ export async function getDepartmentById(
       );
     }
 
+    // Remove security check fields before returning
+    const { departmentCompanyId, departmentManagers, ...departmentData } = existingDepartment;
+    
     return {
-      Department: {
-        departmentId: existingDepartment.departmentId,
-        departmentName: existingDepartment.departmentName,
-        departmentType: existingDepartment.departmentType,
-      }
+      Department: departmentData
     };
   } catch (error) {
     throw throwAppropriateError(error);
   }
 }
-
 export async function deleteDepartment(
   departmentId: string,
  
@@ -123,11 +132,13 @@ export async function deleteDepartment(
 
       const deletedDepartment = await prisma.department.delete({
         where: { departmentId },
-        select: {
+        select:{
           departmentId: true,
           departmentName: true,
           departmentType: true,
-        },
+          departmentJsons: true,
+          departmentConnections: {select:{databaseConnectionConnectionString:true}},
+        }
       });
 
       return { Department: deletedDepartment };
