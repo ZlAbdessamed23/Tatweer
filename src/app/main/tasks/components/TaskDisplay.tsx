@@ -41,7 +41,7 @@ const TaskDisplay = ({ props }: { props: Task }) => {
                 <span>
                     <p className='text-lg text-black font-semibold'>Task Due Date</p>
                     <p className='text-main-blue text-base font-light'>
-                        {props.taskDueDate.toLocaleDateString()} {/* Removes the time */}
+                        {props.taskDueDate ? props.taskDueDate.toLocaleDateString() : new Date().toLocaleDateString()} {/* Removes the time */}
                     </p>
                 </span>
             </div>

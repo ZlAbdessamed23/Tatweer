@@ -26,7 +26,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    
+
     try {
       const res = await fetch("http://localhost:3000/api/auth/signin", {
         method: "POST",
@@ -35,13 +35,13 @@ const Login: React.FC = () => {
         },
         body: JSON.stringify({ userEmail, userPassword, userRole }),
       });
-      
+
       if (!res.ok) {
         throw new Error("Invalid credentials");
       }
-      
+
       await res.json();
-      router.push("/dashboard");
+      router.push("/main/dashboard");
     } catch (err) {
       setError((err as Error).message);
     }

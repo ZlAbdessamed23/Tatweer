@@ -1,44 +1,51 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import TaskDisplay from './components/TaskDisplay';
 import TaskModal from './components/TaskModal';
+import toast from 'react-hot-toast';
+import { getTasks } from '@/app/utils/utils';
 
-const fakeTasks = [
-    {
-        taskId: "TASK001",
-        taskTitle: "Client Outreach",
-        taskDescription: "Reach out to potential clients and pitch our services.",
-        taskCreatedAt: new Date(),
-        taskDueDate: new Date(),
-        taskStatus: "Pending"
-    },
-    {
-        taskId: "TASK002",
-        taskTitle: "Social Media Campaign",
-        taskDescription: "Plan and execute a new marketing campaign on social media.",
-        taskCreatedAt: new Date(),
-        taskDueDate: new Date(),
-        taskStatus: "In Progress"
-    },
-    {
-        taskId: "TASK003",
-        taskTitle: "Budget Analysis",
-        taskDescription: "Review the company's financial statements and prepare a report.",
-        taskCreatedAt: new Date(),
-        taskDueDate: new Date(),
-        taskStatus: "Completed"
-    }
-];
+
+interface Task {
+    taskId: string;
+    taskTitle: string;
+    taskDescription: string;
+    taskCreatedAt: Date;
+    taskDueDate: Date;
+    taskStatus: string;
+    taskManager: string;
+}
 
 const Tasks = () => {
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch tasks from the API when the component mounts
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                setIsLoading(true);
+                const data = await getTasks();
+                setTasks(data.Tasks as Task[]); // Assuming the API returns { Tasks: Array<Task> }
+            } catch (error: any) {
+                setError(error.message);
+                toast.error('Failed to fetch tasks');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTasks();
+    }, []);
 
     // Filter tasks based on search input
-    const filteredTasks = fakeTasks.filter((task) =>
+    const filteredTasks = tasks.filter((task) =>
         task.taskTitle.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -66,14 +73,20 @@ const Tasks = () => {
                     <span>Add</span>
                 </button>
             </div>
+            {isLoading ? (
+                <div className="text-center py-4">Loading tasks...</div>
+            ) : error ? (
+                <p className="text-red-500 text-center">{error}</p>
+            ) : (
+                <div className='flex flex-col gap-6'>
+                    {filteredTasks.length > 0 ? (
+                        filteredTasks.map((task) => <TaskDisplay key={task.taskId} props={task} />)
+                    ) : (
+                        <p className="text-gray-500 text-center">No tasks found.</p>
+                    )}
+                </div>
+            )}
             <TaskModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-            <div className='flex flex-col gap-6'>
-                {filteredTasks.length > 0 ? (
-                    filteredTasks.map((task) => <TaskDisplay key={task.taskId} props={task} />)
-                ) : (
-                    <p className="text-gray-500 text-center">No tasks found.</p>
-                )}
-            </div>
         </div>
     );
 };

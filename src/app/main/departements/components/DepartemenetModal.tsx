@@ -5,23 +5,8 @@ import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaChevronDown } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-
-export enum DepartmentType {
-  sales = 'sales',
-  marketing = 'marketing',
-  finance = 'finance',
-  humanResources = 'humanResources',
-  operations = 'operations',
-  engineering = 'engineering',
-  product = 'product',
-  design = 'design',
-  customerSupport = 'customerSupport',
-  dataScience = 'dataScience',
-  logistics = 'logistics',
-  legal = 'legal',
-  it = 'it',
-  other = 'other'
-}
+import { DepartmentType } from '@/app/types/constant';
+import { getManagers, updateDepartment, addDepartment, deleteDepartment } from '@/app/utils/utils';
 
 interface Department {
   departmentId?: string;
@@ -70,12 +55,10 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
   const selectedType = watch('departmentType');
 
   useEffect(() => {
-    // Fetch managers (Replace with your API endpoint)
     async function fetchManagers() {
       try {
-        const response = await fetch('/api/managers');
-        const data = await response.json();
-        setManagers(data);
+        const data = await getManagers();
+        setManagers(data.Managers as Manager[]);
       } catch (error) {
         toast.error('Failed to load managers');
       }
@@ -83,7 +66,6 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
     if (isOpen) fetchManagers();
   }, [isOpen]);
 
-  // Close managers dropdown when clicking outside
   useEffect(() => {
     const handleClickOutsideManagers = (event: MouseEvent) => {
       if (managersDropdownRef.current && !managersDropdownRef.current.contains(event.target as Node)) {
@@ -94,7 +76,6 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
     return () => document.removeEventListener('mousedown', handleClickOutsideManagers);
   }, []);
 
-  // Close type dropdown when clicking outside
   useEffect(() => {
     const handleClickOutsideType = (event: MouseEvent) => {
       if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target as Node)) {
@@ -105,9 +86,15 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
     return () => document.removeEventListener('mousedown', handleClickOutsideType);
   }, []);
 
-  const onSubmit = (data: Department) => {
+  const onSubmit = async (data: Department) => {
     try {
-      // Implement submission logic here
+      if (department) {
+        const message = await updateDepartment(data);
+        toast.success(message);
+      } else {
+        const message = await addDepartment(data);
+        toast.success(message);
+      }
       onClose();
       reset();
     } catch (error) {
@@ -119,6 +106,18 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
     Object.values(errors).forEach((error) => {
       toast.error(error.message || 'Validation error');
     });
+  };
+
+  const handleDelete = async () => {
+    if (department?.departmentId) {
+      try {
+        const message = await deleteDepartment(department.departmentId);
+        toast.success(message);
+        onClose();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to delete department');
+      }
+    }
   };
 
   return (
@@ -143,9 +142,19 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, depa
               <h2 className="text-xl font-bold text-main-blue">
                 {department ? 'Update Department' : 'Add Department'}
               </h2>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                <FaTimes />
-              </button>
+              <div className="flex items-center gap-2">
+                {department && (
+                  <button
+                    onClick={handleDelete}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                )}
+                <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">

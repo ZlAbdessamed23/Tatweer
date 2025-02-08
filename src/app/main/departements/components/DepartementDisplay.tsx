@@ -31,7 +31,7 @@ const DepartementDisplay = ({ props }: { props: Department }) => {
             <div>
                 <span>
                     <p className='text-lg text-black font-semibold'>Departement Manager</p>
-                    <p className='text-main-blue text-base font-light'>{props.departmentManagers[0]}</p>
+                    {/* <p className='text-main-blue text-base font-light'>{props.departmentManagers[0]}</p> */}
                 </span>
             </div>
             <div>

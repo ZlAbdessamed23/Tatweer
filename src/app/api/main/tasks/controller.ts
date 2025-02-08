@@ -7,52 +7,45 @@ import { throwAppropriateError } from "@/lib/error-handler/throwError";
 
 export async function addTask(
   data: AddTaskData,
-  
   userId: string,
- 
 ): Promise<TaskResult> {
   try {
-    return await prisma.$transaction(async (prisma) => {
-      
+    // Validate that taskDueDate is provided
+    if (!data.taskDueDate) {
+      throw new Error("taskDueDate must be provided");
+    }
 
-      // Parallel verification of hotel and user
-      
-
-      
-
-      
-
-      
-      // Create task
-      const createdTask = await prisma.task.create({
-        data: {
-          taskTitle: data.taskTitle,
-          taskDescription: data.taskDescription,
-         taskManagerId: data.taskManager,
-            taskAdminId: userId,
-            taskDueDate: data.taskDueDate,
-            taskStatus: data.taskStatus,
-          
-         
-        
-          
+    const createdTask = await prisma.task.create({
+      data: {
+        taskTitle: data.taskTitle,
+        taskDescription: data.taskDescription,
+        taskDueDate: data.taskDueDate, // Ensure this is provided
+        taskStatus: data.taskStatus,
+        taskAdmin: {
+          connect: {
+            adminId: userId, // Connect to existing admin using userId
+          },
         },
-        select:{
-            taskId: true,
-            taskTitle: true,
-            taskDescription: true,
-            taskManager: {
-                select:{
-                managerId: true,
-                managerFirstName: true,
-                
-                }
-            }
-        }});
-
-     
-      return { Task: createdTask };
+        taskManager: {
+          connect: {
+            managerId: data.taskManager, // Connect to existing manager
+          },
+        },
+      },
+      select: {
+        taskId: true,
+        taskTitle: true,
+        taskDescription: true,
+        taskManager: {
+          select: {
+            managerId: true,
+            managerFirstName: true,
+          },
+        },
+      },
     });
+
+    return { Task: createdTask };
   } catch (error) {
     throwAppropriateError(error);
   }
@@ -60,31 +53,31 @@ export async function addTask(
 
 export async function getAllTasks(
   userId: string,
-  
- 
-  
+
+
+
 ): Promise<TasksResult> {
   try {
-    
+
 
     const tasks = await prisma.task.findMany({
       where: {
-        taskAdminId:userId,
+        taskAdminId: userId,
         // Use ternary to set the correct ID field based on role
-       
+
       },
-      select:{
+      select: {
         taskId: true,
         taskTitle: true,
         taskDescription: true,
         taskManager: {
-            select:{
+          select: {
             managerId: true,
             managerFirstName: true,
-            
-            }
+
+          }
         }
-    }
+      }
     });
 
     return { Tasks: tasks };

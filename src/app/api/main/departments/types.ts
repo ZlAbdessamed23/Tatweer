@@ -1,10 +1,8 @@
 import { DepartementType, Prisma } from "@prisma/client";
 
 export type AddDepartmentData = {
-    departmentName  :         string;
-    departmentType   :        DepartementType
-  
-
+  departmentName: string;
+  departmentType: DepartementType
   managerAccess: {
     managerId: string;
   }[];
@@ -12,27 +10,27 @@ export type AddDepartmentData = {
 
 export const requiredDepartmentFields: (keyof AddDepartmentData)[] = [
   "departmentName",
-    "departmentType",
-
+  "departmentType",
   "managerAccess",
 ];
 
 export type DepartmentResult = {
-  Department: Prisma.DepartmentGetPayload<{select: { 
-    departmentId: true;
-    departmentName: true;
-    departmentType: true;
-
-   };}>;
+  Department: Prisma.DepartmentGetPayload<{
+    select: {
+      departmentId: true;
+      departmentName: true;
+      departmentType: true;
+    };
+  }>;
 };
 
 export type DepartmentsResult = {
   Departments: Prisma.DepartmentGetPayload<{
     select: {
-        departmentId: true;
-        departmentName: true;
-        departmentType: true;
-        
+      departmentId: true;
+      departmentName: true;
+      departmentType: true;
+      departmentManagers : true;
     };
   }>[];
 };

@@ -8,12 +8,8 @@ import {
   export type AddManagerData = {
     managerFirstName: string;
     managerLastName: string;
-    
     managerEmail: string;
-   
-    
     managerPassword: string;
-
   };
   
   export const requiredFields: (keyof AddManagerData)[] = [
