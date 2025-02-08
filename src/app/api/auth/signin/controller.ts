@@ -131,6 +131,8 @@ async function generateToken(
     .sign(secret);
 }
 
+
+
 async function handleAdminSignIn(admin: Admin): Promise<SignInResult> {
   if (!admin.managedCompany?.companySubscription) {
     throw new ValidationError("Informations d'abonnement non trouvées");

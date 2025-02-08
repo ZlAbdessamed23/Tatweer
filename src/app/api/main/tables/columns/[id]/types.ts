@@ -6,5 +6,9 @@ export type UpdateColumnData = {
   };
   
   export type ColumnResult = {
-    Column: Prisma.ColumnGetPayload<{}> | null;
+    Column: Prisma.ColumnGetPayload<{select:{
+      columnName:true,
+      columnType:true,
+      columnId:true
+    }}> | null;
   };

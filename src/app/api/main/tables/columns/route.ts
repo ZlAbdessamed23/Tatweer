@@ -4,7 +4,7 @@ import {
   
   
 } from "@/app/api/main/tables/columns/controller";
-import { AddColumnData, requiredColumnFields } from "@/app/api/main/tables/columns/types";
+import { AddColumnData, requiredcolumnFields } from "@/app/api/main/tables/columns/types";
 import { handleError } from "@/lib/error-handler/handleError";
 import { getUser } from "@/lib/token/getUserFromToken";
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     
  
     const data: AddColumnData = await request.json();
-    const missingFields = requiredColumnFields.filter(
+    const missingFields = requiredcolumnFields.filter(
           (field) => !data[field]
         );
     
@@ -43,4 +43,3 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return handleError(error);
   }
 }
-

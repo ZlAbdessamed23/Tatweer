@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma/prismaClient";
 import bcrypt from "bcrypt";
-import { generateVerificationToken } from "@/lib/third-party/email/generateVerificationToken";
+
 import {
   AdminSignupData,
   AdminSignupResult,
@@ -9,11 +9,11 @@ import {
   ValidationError,
   NotFoundError,
   ConflictError,
-  InternalServerError,
+
 } from "@/lib/error-handler/customeErrors";
 import { throwAppropriateError } from "@/lib/error-handler/throwError";
 import { PrismaClient } from "@prisma/client";
-import { sendMail } from "@/lib/third-party/email/sendMail";
+
 
 export async function createAdmin(
   data: AdminSignupData

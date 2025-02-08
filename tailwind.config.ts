@@ -14,7 +14,7 @@ const config: Config = {
         montserrat: "var(--font-montserrat), sans-serif",
       },
       colors: {
-        
+        "main-blue" : "#343C6A"
       },
     },
   },

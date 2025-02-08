@@ -20,6 +20,11 @@ export async function updateColumn(
           const updatedColumn = await prisma.column.update({
             where: { columnId },
             data: updateData,
+            select:{
+              columnName:true,
+              columnType:true,
+              columnId:true
+            }
           });
           
           return { Column: updatedColumn };
@@ -43,6 +48,11 @@ export async function updateColumn(
     try {
       const deletedColumn = await prisma.column.delete({
         where: { columnId },
+        select:{
+          columnName:true,
+          columnType:true,
+          columnId:true
+        }
       });
       
       return { Column: deletedColumn };

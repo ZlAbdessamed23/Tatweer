@@ -17,16 +17,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     
         if (missingFields.length > 0) {
           
-    
+          console.log(missingFields.length)
+          console.log(missingFields)
           return NextResponse.json(
             { message: `${missingFields.join(", ")}: sont requis` },
             { status: 400 }
           );
         }
    
-    const { admin, token} = await createAdmin(data);
+     await createAdmin(data);
 
-    await sendVerificationEmail(admin.adminEmail,token,admin.adminFirstName);
+   
 
     return NextResponse.json(
       {

@@ -15,7 +15,7 @@ import { getUser } from "@/lib/token/getUserFromToken";
 // New route to get an Manager by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const user = getUser(request);
@@ -25,7 +25,7 @@ export async function GET(
     
     checkAdminRole(user.role);
 
-    const ManagerId = params.id;
+    const ManagerId = (await params).id;
     const Manager = await getManagerById(ManagerId);
 
     return NextResponse.json(Manager, { status: 200 });
@@ -37,7 +37,7 @@ export async function GET(
 // New route to delete an Manager by ID
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const user = getUser(request);
@@ -47,7 +47,7 @@ export async function DELETE(
     
     checkAdminRole(user.role);
 
-    const ManagerId = params.id;
+    const ManagerId = (await params).id;
      await deleteManagerById(ManagerId);
 
     return NextResponse.json(
@@ -61,7 +61,7 @@ export async function DELETE(
 ////////////////////// update ///////////////////////
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const user = getUser(request);
@@ -71,7 +71,7 @@ export async function PATCH(
     
     checkAdminRole(user.role);
 
-    const ManagerId = params.id;
+    const ManagerId = (await params).id;
     const updateData: UpdateManagerData = await request.json();
 
      await updateManager(

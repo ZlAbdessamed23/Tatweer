@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable}  ${Montserrat.variable}     antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable}  ${Montserrat.variable}  overflow-x-hidden   `}
       >
         <Toaster />
         {children}
